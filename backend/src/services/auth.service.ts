@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-
+import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
 
 export class AuthService {
@@ -34,4 +34,37 @@ export class AuthService {
 
         return user;
     };
+
+    login = async (reqData: {
+        email: string;
+        password: string
+    }) => {
+
+        const user = await this.userRepository.findUserByEmail(reqData.email);
+
+        if (!user) throw new Error('Invalid Credentials');
+
+        const isPasswordValid = await bcrypt.compare(reqData.password, user.password);
+
+        if (!isPasswordValid) throw new Error('Invalid Credentials');
+
+        const jwtPayload = {
+            userId: user.id,
+            email: user.email,
+            role: user.role
+        }
+
+        // Generate JWT token
+        const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+
+        return {
+            jwtToken,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        };
+    }
 }
