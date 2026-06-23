@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
-    "launchDbStudio": "npx prisma studio",
-    "launchDbMigrate": "npx prisma migrate dev",
-    "DockerDbUp": "docker compose up -d"
+    "serverup": "nodemon src/server.ts",
+    "prismastudio": "npx prisma studio",
+    "migrateprisma": "npx prisma migrate dev",
+    "dockercomposeup": "docker compose up -d"
   },
   "keywords": [],
   "author": "",
