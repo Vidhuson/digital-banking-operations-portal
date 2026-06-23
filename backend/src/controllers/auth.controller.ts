@@ -48,4 +48,12 @@ export class AuthController {
         });
     };
 
+    adminDashboard = (req: AuthRequest, res: Response) => {
+        return res.status(200).json({
+            success: true,
+            message: 'Welcome Admin',
+            data: req.user
+        });
+    };
+
 }

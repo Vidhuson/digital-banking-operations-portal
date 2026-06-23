@@ -1,8 +1,14 @@
 import { Request } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
+import { Role } from '@prisma/client';
 
+// JWT data stored in token after login
+export interface UserJwtPayload {
+  userId: string;
+  email: string;
+  role: Role;
+}
 
 // Custom Express request interface  - contains both Express Request properties + custom property (user)
 export interface AuthRequest extends Request { // Extends default Express Request object 
-  user?: string | JwtPayload;
+  user?: UserJwtPayload;
 }
