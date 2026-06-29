@@ -1,14 +1,6 @@
 
 import { prisma } from '../config/prisma';
-
-export interface CreateCustomerDto {
-  customerNumber: string;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  address?: string;
-  dateOfBirth?: Date;
-}
+import { CreateCustomerDto } from '../dtos/customer.dto';
 
 export class CustomerRepository {
 
@@ -20,7 +12,30 @@ export class CustomerRepository {
 
     findCustomerByEmail = async (email: string) => {
         return prisma.customer.findUnique({
-            where: {email}
+            where: { email }
+        });
+    };
+
+    getCustomers = async () => {
+        return prisma.customer.findMany();
+    };
+
+    getCustomerById = async (id: string) => {
+        return prisma.customer.findUnique({
+            where: { id }
+        })
+    }
+
+    updateCustomer = async (id: string, customerData: Partial<CreateCustomerDto>) => {
+        return prisma.customer.update({
+            where: { id },
+            data: customerData
+        });
+    };
+
+    deleteCustomer = async (id: string) => {
+        return prisma.customer.delete({
+            where: { id }
         });
     };
 }
