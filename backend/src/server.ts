@@ -1,6 +1,7 @@
 import express from 'express';
 import authRoutes from './routes/auth.routes';
 import customerRoutes from './routes/customer.routes'
+import accountRoutes from './routes/account.routes';
 
 const app = express();
 app.use(express.json());
@@ -14,9 +15,9 @@ app.get('/', (req, res) => {
   });
 });
 
-
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/customers', customerRoutes)
+app.use('/api/v1/customers', customerRoutes);
+app.use("/api/v1/accounts", accountRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -26,10 +26,10 @@ export class CustomerRepository {
         })
     }
 
-    updateCustomer = async (id: string, customerData: Partial<CreateCustomerDto>) => {
+    updateCustomer = async (id: string, updateData: Partial<CreateCustomerDto>) => {
         return prisma.customer.update({
             where: { id },
-            data: customerData
+            data: updateData
         });
     };
 
