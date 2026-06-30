@@ -8,6 +8,10 @@ const router = Router();
 
 const accountController = new AccountController();
 
-router.post('/',authenticate, authorize(Role.CUSTOMER), accountController.createAccount);
+router.post('/', authenticate, authorize(Role.CUSTOMER), accountController.createAccount);
+router.get('/', authenticate, authorize(Role.CUSTOMER), accountController.getAccounts);
+router.get("/:id", authenticate, authorize(Role.CUSTOMER), accountController.getAccountById);
+router.put("/:id", authenticate, authorize(Role.CUSTOMER), accountController.updateAccount);
+router.delete("/:id", authenticate, authorize(Role.CUSTOMER), accountController.deleteAccount);
 
 export default router;
