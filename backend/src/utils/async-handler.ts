@@ -17,7 +17,7 @@ export const asyncHandler = (
         next: NextFunction
     ) => {
         return Promise
-            .resolve(fn(req, res, next))
-            .catch(next);
+            .resolve(fn(req, res, next)) //it execute controller methods.
+            .catch(next); //it calls error middleware. 
     };
 };

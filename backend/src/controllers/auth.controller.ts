@@ -30,19 +30,21 @@ export class AuthController {
 
     //authRequest type add which contains express request + user property
     getProfile = async (req: AuthRequest, res: Response) => {
-        return res.status(200).json({
-            success: true,
-            message: 'Profile fetched successfully',
-            data: req.user
-        });
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Profile fetched successfully",
+            req.user
+        );
     };
 
     adminDashboard = (req: AuthRequest, res: Response) => {
-        return res.status(200).json({
-            success: true,
-            message: 'Welcome Admin',
-            data: req.user
-        });
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Profile fetched successfully",
+            req.user
+        );
     };
 
 }
