@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
+import { ApiError } from '../utils/api-error';
+import { HttpStatus } from '../utils/http-status';
 
 export class AuthService {
 
@@ -14,8 +16,8 @@ export class AuthService {
         const existingUser =
             await this.userRepository.findUserByEmail(data.email);
 
-        if (existingUser) throw new Error('User already exists');
-
+        if (existingUser) throw new ApiError(HttpStatus.CONFLICT, 'User already exists');
+        
         const hashedPassword =
             await bcrypt.hash(data.password, 10);
 
@@ -35,11 +37,11 @@ export class AuthService {
 
         const user = await this.userRepository.findUserByEmail(reqData.email);
 
-        if (!user) throw new Error('Invalid Credentials');
+        if (!user) throw new ApiError(HttpStatus.UNAUTHORIZED ,'Invalid Credentials');
 
         const isPasswordValid = await bcrypt.compare(reqData.password, user.password);
 
-        if (!isPasswordValid) throw new Error('Invalid Credentials');
+        if (!isPasswordValid) throw new ApiError(HttpStatus.UNAUTHORIZED, 'Invalid Credentials');
 
         const jwtPayload = {
             userId: user.id,
