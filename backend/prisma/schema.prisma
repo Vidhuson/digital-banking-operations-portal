@@ -33,6 +33,30 @@ enum AccountStatus {
   CLOSED
 }
 
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  FUND_TRANSFER
+}
+
+enum TransactionMode {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TransactionChannel {
+  BRANCH
+  ATM
+  INTERNET_BANKING
+  MOBILE_BANKING
+}
+
 model User {
   id       String @id @default(uuid())
   name     String
@@ -62,10 +86,35 @@ model Account {
   accountNumber String        @unique
   customerId    String
   customer      Customer      @relation(fields: [customerId], references: [id])
+  branchName    String
+  ifscCode      String
   accountType   AccountType
   balance       Decimal       @default(0.00) @db.Decimal(15, 2)
   currency      String        @default("INR")
   status        AccountStatus @default(ACTIVE)
+  transactions  Transaction[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+}
+
+model Transaction {
+  id                        String             @id @default(uuid())
+  transactionReference      String
+  accountId                 String
+  account                   Account            @relation(fields: [accountId], references: [id])
+  accountNumber             String
+  counterpartyAccountNumber String?
+  transactionType           TransactionType
+  transactionMode           TransactionMode
+  transactionChannel        TransactionChannel
+  amount                    Decimal            @db.Decimal(15, 2)
+  openingBalance            Decimal            @db.Decimal(15, 2)
+  closingBalance            Decimal            @db.Decimal(15, 2)
+  status                    TransactionStatus
+  remarks                   String?
+  sourceReference           String?
+  createdAt                 DateTime           @default(now())
+
+  @@index([transactionReference])
+  @@index([accountNumber])
 }
