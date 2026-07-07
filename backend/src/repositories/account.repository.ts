@@ -1,17 +1,10 @@
-import { AccountStatus, AccountType } from '@prisma/client';
+import { AccountStatus, AccountType, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
-import { UpdateAccountDto } from "../dtos/account.dto";
+import { CreateAccountRepositoryDto, UpdateAccountRepositoryDto } from "../dtos/account.dto";
 
 export class AccountRepository {
 
-    createAccount = async (accountData: {
-        accountNumber: string;
-        customerId: string;
-        accountType: AccountType;
-        balance: number;
-        currency: string;
-        status: AccountStatus;
-    }) => {
+    createAccount = async (accountData: CreateAccountRepositoryDto) => {
         return prisma.account.create({
             data: accountData
         })
@@ -30,13 +23,19 @@ export class AccountRepository {
         });
     };
 
+    getAccountByAccountNumber = async (accountNumber: string) => {
+        return prisma.account.findUnique({
+            where: { accountNumber }
+        });
+    };
+
     deleteAccount = async (id: string) => {
         return prisma.account.delete({
             where: { id }
         });
     };
 
-    updateAccount = async (id: string, updateData: UpdateAccountDto) => {
+    updateAccount = async (id: string, updateData: UpdateAccountRepositoryDto) => {
         return prisma.account.update({
             where: { id },
             data: updateData
