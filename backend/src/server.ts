@@ -2,6 +2,7 @@ import express from 'express';
 import authRoutes from './routes/auth.routes';
 import customerRoutes from './routes/customer.routes'
 import accountRoutes from './routes/account.routes';
+import transactionRoutes from './routes/transaction.routes';
 import { errorMiddleware } from "./middleware/error.middleware";
 
 const app = express();
@@ -19,6 +20,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/customers', customerRoutes);
 app.use("/api/v1/accounts", accountRoutes);
+app.use("/api/v1/transactions", transactionRoutes);
 
 app.use(errorMiddleware);
 

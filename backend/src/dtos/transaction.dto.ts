@@ -8,7 +8,6 @@ export interface DepositDto {
     amount: number;
     transactionChannel: TransactionChannel;
     remarks?: string;
-
 }
 
 export interface WithdrawDto {

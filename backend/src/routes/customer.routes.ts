@@ -10,7 +10,6 @@ const router = Router();
 
 const customerController = new CustomerController();
 
-//auth routes
 router.post('/', authenticate, authorize(Role.CUSTOMER), asyncHandler(customerController.createCustomer));
 router.get('/', authenticate, authorize(Role.CUSTOMER), asyncHandler(customerController.getCustomers));
 router.get('/:id', authenticate, authorize(Role.CUSTOMER), asyncHandler(customerController.getCustomerById));

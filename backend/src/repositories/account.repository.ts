@@ -35,8 +35,9 @@ export class AccountRepository {
         });
     };
 
-    updateAccount = async (id: string, updateData: UpdateAccountRepositoryDto) => {
-        return prisma.account.update({
+    updateAccount = async (id: string, updateData: UpdateAccountRepositoryDto, tx?: Prisma.TransactionClient) => {
+        const db = tx ?? prisma
+        return db.account.update({
             where: { id },
             data: updateData
         });

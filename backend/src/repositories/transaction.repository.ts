@@ -1,9 +1,11 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { CreateTransactionRepositoryDto } from "../dtos/transaction.dto";
 
 export class TransactionRepository {
-    createTransaction = async (transactionData: CreateTransactionRepositoryDto) => {
-        return prisma.transaction.create({
+    createTransaction = async (transactionData: CreateTransactionRepositoryDto, tx?: Prisma.TransactionClient) => {
+        const db = tx ?? prisma ;
+        return db.transaction.create({
             data: transactionData
         });
     };
