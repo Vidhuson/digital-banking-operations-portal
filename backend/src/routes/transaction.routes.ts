@@ -10,5 +10,5 @@ const router = Router();
 const transactionController = new TransactionController();
 
 router.post("/deposit", authenticate, authorize(Role.CUSTOMER), asyncHandler(transactionController.deposit));
-
+router.post("/withdraw", authenticate, authorize(Role.CUSTOMER), asyncHandler(transactionController.withdraw));
 export default router;

@@ -1,7 +1,6 @@
 import { AccountRepository } from "../repositories/account.repository"
 import { CustomerRepository } from "../repositories/customer.repository";
 import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
-import { AccountStatus } from "@prisma/client";
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
 
@@ -20,10 +19,9 @@ export class AccountService {
         const accountDetails = await this.accountRepository.createAccount({
             accountNumber: accountNumber,
             customerId: accountData.customerId,
-            accountType: accountData.accountType,
-            balance: 0,
-            currency: 'INR',
-            status: AccountStatus.ACTIVE
+            branchName: "Chennai Main Branch",
+            ifscCode: "DBOP0001001",
+            accountType: accountData.accountType
         })
         return accountDetails;
     }
@@ -34,6 +32,12 @@ export class AccountService {
 
     getAccountById = async (id: any) => {
         const account = await this.accountRepository.getAccountById(id);
+        if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
+        return account;
+    }
+
+    getAccountByAccountNumber = async (accountNumber: any) => {
+        const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
         if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
         return account;
     }

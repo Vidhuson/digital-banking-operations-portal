@@ -25,8 +25,7 @@ export interface CreateAccountRepositoryDto {
     branchName: string;
     ifscCode: string;
     accountType: AccountType;
-    balance: Prisma.Decimal;
-    currency: string;
+    currency?: string;
 }
 
 export interface UpdateAccountRepositoryDto {

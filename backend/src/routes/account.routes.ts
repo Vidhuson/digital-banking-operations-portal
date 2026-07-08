@@ -14,5 +14,6 @@ router.get('/', authenticate, authorize(Role.CUSTOMER), asyncHandler(accountCont
 router.get("/:id", authenticate, authorize(Role.CUSTOMER), asyncHandler(accountController.getAccountById));
 router.put("/:id", authenticate, authorize(Role.CUSTOMER), asyncHandler(accountController.updateAccount));
 router.delete("/:id", authenticate, authorize(Role.CUSTOMER), asyncHandler(accountController.deleteAccount));
+router.get("/account-number/:accountNumber", authenticate, authorize(Role.CUSTOMER), asyncHandler(accountController.getAccountByAccountNumber));
 
 export default router;

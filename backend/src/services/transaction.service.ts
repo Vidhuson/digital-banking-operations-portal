@@ -1,5 +1,5 @@
 import { AccountStatus, Prisma, TransactionChannel, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
-import { CreateTransactionRepositoryDto, DepositDto } from "../dtos/transaction.dto";
+import { CreateTransactionRepositoryDto, DepositDto, WithdrawDto } from "../dtos/transaction.dto";
 import { AccountRepository } from "../repositories/account.repository";
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
@@ -9,6 +9,23 @@ import { TransactionRepository } from "../repositories/transaction.repository";
 export class TransactionService {
     private accountRepository = new AccountRepository();
     private transactionRepository = new TransactionRepository();
+
+    private generateTransactionReference = () => {
+        return `TXN${Date.now()}`;
+    }
+
+    private getValidatedAccount = async (accountNumber : string) => {
+        const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
+
+        if (!account)
+            throw new ApiError(HttpStatus.NOT_FOUND, "Account not found.");
+
+        // Validate Account Status
+        if (account.status != AccountStatus.ACTIVE)
+            throw new ApiError(HttpStatus.BAD_REQUEST, "Account is not active.");
+
+        return account;
+    }
 
     deposit = async (depositData: DepositDto) => {
         
@@ -24,14 +41,7 @@ export class TransactionService {
             throw new ApiError(HttpStatus.BAD_REQUEST, "Deposit amount must be greater than zero.");
 
         // Get Account
-        const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
-
-        if (!account)
-            throw new ApiError(HttpStatus.NOT_FOUND, "Account not found.");
-
-        // Validate Account Status
-        if (account.status != AccountStatus.ACTIVE)
-            throw new ApiError(HttpStatus.BAD_REQUEST, "Account is not active.");
+        const account = await this.getValidatedAccount(accountNumber);
 
         // Balance Calculation
         const openingBalance = account.balance;
@@ -40,7 +50,7 @@ export class TransactionService {
 
         const closingBalance = openingBalance.plus(depositAmount);
 
-        const transactionReference = `TXN${Date.now()}`;
+        const transactionReference = this.generateTransactionReference();
 
         //Repository DTO
         const transactionRepositoryData: CreateTransactionRepositoryDto = {
@@ -76,6 +86,72 @@ export class TransactionService {
             transactionReference,
             accountNumber: account.accountNumber,
             depositedAmount: depositAmount,
+            availableBalance: closingBalance
+        };
+    }
+
+    withdraw = async (withdrawData: WithdrawDto) => {
+        
+        const {
+            accountNumber,
+            amount,
+            transactionChannel,
+            remarks
+        } = withdrawData;
+
+        // Validate Amount
+        if (amount <= 0)
+            throw new ApiError(HttpStatus.BAD_REQUEST, "Withdraw amount must be greater than zero.");
+
+        // Get Account
+        const account = await this.getValidatedAccount(accountNumber);
+
+        // Balance Calculation
+        const openingBalance = account.balance;
+
+        const withdrawAmount = new Prisma.Decimal(amount);
+
+        if(openingBalance.lessThan(withdrawAmount))
+            throw new ApiError(HttpStatus.BAD_REQUEST, "Insufficient account balance")
+
+        const closingBalance = openingBalance.minus(withdrawAmount);
+
+        const transactionReference = this.generateTransactionReference();
+
+        //Repository DTO
+        const transactionRepositoryData: CreateTransactionRepositoryDto = {
+            transactionReference: transactionReference,
+            accountId: account.id,
+            accountNumber: accountNumber,
+            transactionType: TransactionType.DEPOSIT,
+            transactionMode: TransactionMode.CREDIT,
+            transactionChannel: transactionChannel,
+            amount: withdrawAmount,
+            openingBalance: openingBalance,
+            closingBalance: closingBalance,
+            status: TransactionStatus.SUCCESS,
+            remarks: remarks
+        }
+
+        // Database Transaction
+        await prisma.$transaction(async (tx) => {
+
+            await this.accountRepository.updateAccount(
+                account.id,
+                { balance: closingBalance },
+                tx
+            );
+
+            await this.transactionRepository.createTransaction(
+                transactionRepositoryData,
+                tx
+            );
+        });
+
+        return {
+            transactionReference,
+            accountNumber: account.accountNumber,
+            withdrawnAmount: withdrawAmount,
             availableBalance: closingBalance
         };
     }

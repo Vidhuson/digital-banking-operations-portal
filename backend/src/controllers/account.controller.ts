@@ -38,6 +38,17 @@ export class AccountController {
         )
     }
 
+    getAccountByAccountNumber = async (req: Request, res: Response) => {
+        const accountNumber = req.params.accountNumber as string
+        const accountDetails = await this.accountService.getAccountByAccountNumber(accountNumber);
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Account fetched successfully",
+            accountDetails
+        )
+    }
+
     updateAccount = async (req: Request, res: Response) => {
         const id = req.params.id as string;
         const body = req.body

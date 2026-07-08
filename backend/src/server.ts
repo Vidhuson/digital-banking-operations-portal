@@ -24,6 +24,6 @@ app.use("/api/v1/transactions", transactionRoutes);
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
