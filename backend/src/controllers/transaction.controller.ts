@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { TransactionService } from "../services/transaction.service";
 import { ApiResponse } from "../utils/api-response";
 import { HttpStatus } from "../utils/http-status";
-import { DepositDto, WithdrawDto } from "../dtos/transaction.dto";
+import { DepositDto, FundTransferDto, WithdrawDto } from "../dtos/transaction.dto";
 
 export class TransactionController {
     private transactionService = new TransactionService();
@@ -25,6 +25,17 @@ export class TransactionController {
             res,
             HttpStatus.CREATED,
             "Amount withdrawn successfully.",
+            response
+        )
+    }
+
+    fundTransfer = async (req: Request, res: Response) => {
+        const fundTransferData: FundTransferDto = req.body;
+        const response = await this.transactionService.fundTransfer(fundTransferData);
+        return ApiResponse.success(
+            res,
+            HttpStatus.CREATED,
+            "Fund transfer completed successfully.",
             response
         )
     }
