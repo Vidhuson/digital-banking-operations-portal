@@ -9,7 +9,7 @@ export class CustomerService {
 
     createCustomer = async (customerData: CreateCustomerDto) => {
 
-        const customer = await this.customerRepository.findCustomerByEmail(customerData.email);
+        const customer = await this.customerRepository.getCustomerByEmail(customerData.email);
 
         if (customer) throw new ApiError(HttpStatus.CONFLICT, 'Customer already exists');
 

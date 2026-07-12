@@ -10,7 +10,7 @@ export class CustomerRepository {
         });
     }
 
-    findCustomerByEmail = async (email: string) => {
+    getCustomerByEmail = async (email: string) => {
         return prisma.customer.findUnique({
             where: { email }
         });
