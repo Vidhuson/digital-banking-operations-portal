@@ -5,27 +5,40 @@ import { ApiError } from '../utils/api-error';
 import { HttpStatus } from '../utils/http-status';
 import { ReferenceGenerator } from '../utils/reference-generator';
 import { SignupDto } from '../dtos/user.dto';
+import { AuditLogService } from './audit-log.service';
+import { AuditAction, AuditModule, AuditStatus } from '@prisma/client';
 
 export class AuthService {
 
     private userRepository = new UserRepository();
+    private auditLogService = new AuditLogService();
 
     signup = async (data: SignupDto) => {
         const existingUser =
             await this.userRepository.findUserByEmail(data.email);
 
         if (existingUser) throw new ApiError(HttpStatus.CONFLICT, 'User already exists');
-        
+
         const hashedPassword =
             await bcrypt.hash(data.password, 10);
 
         const userNumber = ReferenceGenerator.generateUserNumber();
 
         const user = await this.userRepository.createUser({
-            userNumber : userNumber,
+            userNumber: userNumber,
             name: data.name,
             email: data.email,
             password: hashedPassword,
+        });
+
+        await this.auditLogService.log({
+            userNumber: user.userNumber,
+            userRole: user.role,
+            module: AuditModule.AUTH,
+            action: AuditAction.SIGNUP,
+            entityReference: user.userNumber,
+            status: AuditStatus.SUCCESS,
+            description: "User registered successfully."
         });
 
         return user;
@@ -38,7 +51,7 @@ export class AuthService {
 
         const user = await this.userRepository.findUserByEmail(reqData.email);
 
-        if (!user) throw new ApiError(HttpStatus.UNAUTHORIZED ,'Invalid Credentials');
+        if (!user) throw new ApiError(HttpStatus.UNAUTHORIZED, 'Invalid Credentials');
 
         const isPasswordValid = await bcrypt.compare(reqData.password, user.password);
 
@@ -46,12 +59,23 @@ export class AuthService {
 
         const jwtPayload = {
             userId: user.id,
+            userNumber: user.userNumber,
             email: user.email,
             role: user.role
         }
 
         // Generate JWT token
         const jwtToken = jwt.sign(jwtPayload, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+
+        await this.auditLogService.log({
+            userNumber: user.userNumber,
+            userRole: user.role,
+            module: AuditModule.AUTH,
+            action: AuditAction.LOGIN,
+            entityReference: user.userNumber,
+            status: AuditStatus.SUCCESS,
+            description: "User logged in successfully."
+        });
 
         return {
             jwtToken,

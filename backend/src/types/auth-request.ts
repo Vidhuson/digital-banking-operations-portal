@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 // JWT data stored in token after login
 export interface UserJwtPayload {
   userId: string;
+  userNumber: string;
   email: string;
   role: Role;
 }
