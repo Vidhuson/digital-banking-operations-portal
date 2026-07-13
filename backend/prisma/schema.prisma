@@ -57,6 +57,32 @@ enum TransactionChannel {
   MOBILE_BANKING
 }
 
+enum AuditModule {
+  AUTH
+  CUSTOMER
+  ACCOUNT
+  TRANSACTION
+  DASHBOARD
+}
+
+enum AuditAction {
+  SIGNUP
+  LOGIN
+  CREATE_CUSTOMER
+  UPDATE_CUSTOMER
+  CREATE_ACCOUNT
+  DEPOSIT
+  WITHDRAW
+  FUND_TRANSFER
+  VIEW_CUSTOMER_DASHBOARD
+  VIEW_ADMIN_DASHBOARD
+}
+
+enum AuditStatus {
+  SUCCESS
+  FAILURE
+}
+
 model User {
   id          String @id @default(uuid())
   userNumber  String @unique
@@ -118,4 +144,21 @@ model Transaction {
 
   @@index([transactionReference])
   @@index([accountNumber])
+}
+
+model AuditLog {
+  id               String       @id @default(uuid())
+  auditReference   String       @unique
+  userNumber       String
+  userRole         Role
+  module           AuditModule
+  action           AuditAction
+  entityReference  String?
+  status           AuditStatus
+  description      String
+  createdAt        DateTime     @default(now())
+  @@index([userNumber])
+  @@index([module])
+  @@index([action])
+  @@index([createdAt])
 }
