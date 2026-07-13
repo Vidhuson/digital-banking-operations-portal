@@ -5,9 +5,11 @@ import accountRoutes from './routes/account.routes';
 import transactionRoutes from './routes/transaction.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import { errorMiddleware } from "./middleware/error.middleware";
+import { requestContextMiddleware } from './middleware/request-context.middleware';
 
 const app = express();
 app.use(express.json());
+app.use(requestContextMiddleware);
 
 const PORT = 5000;
 

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthRequest, UserJwtPayload } from '../types/auth-request';
+import { RequestContext } from '../context/request-context';
 
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction ) => {
@@ -23,6 +24,8 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
         const decoded = jwt.verify( token, process.env.JWT_SECRET as string ) as UserJwtPayload; 
         // Attach decoded user to request 
         req.user = decoded; 
+
+        RequestContext.setCurrentUser(decoded);
 
         next();
 
