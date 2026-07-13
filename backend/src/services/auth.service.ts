@@ -3,16 +3,14 @@ import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/user.repository';
 import { ApiError } from '../utils/api-error';
 import { HttpStatus } from '../utils/http-status';
+import { ReferenceGenerator } from '../utils/reference-generator';
+import { SignupDto } from '../dtos/user.dto';
 
 export class AuthService {
 
     private userRepository = new UserRepository();
 
-    signup = async (data: {
-        name: string;
-        email: string;
-        password: string;
-    }) => {
+    signup = async (data: SignupDto) => {
         const existingUser =
             await this.userRepository.findUserByEmail(data.email);
 
@@ -21,10 +19,13 @@ export class AuthService {
         const hashedPassword =
             await bcrypt.hash(data.password, 10);
 
+        const userNumber = ReferenceGenerator.generateUserNumber();
+
         const user = await this.userRepository.createUser({
+            userNumber : userNumber,
             name: data.name,
             email: data.email,
-            password: hashedPassword
+            password: hashedPassword,
         });
 
         return user;

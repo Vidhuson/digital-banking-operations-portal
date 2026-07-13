@@ -2,6 +2,7 @@ import { CustomerRepository } from "../repositories/customer.repository";
 import { CreateCustomerDto } from '../dtos/customer.dto';
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
+import { ReferenceGenerator } from "../utils/reference-generator";
 
 export class CustomerService {
 
@@ -13,7 +14,7 @@ export class CustomerService {
 
         if (customer) throw new ApiError(HttpStatus.CONFLICT, 'Customer already exists');
 
-        const customerNumber = `CUST${Date.now()}`;
+        const customerNumber = ReferenceGenerator.generateCustomerNumber();
         const customerToCreate = {
             ...customerData,
             customerNumber

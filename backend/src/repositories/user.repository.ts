@@ -1,4 +1,5 @@
 import { prisma } from '../config/prisma';
+import { CreateUserRepositoryDto } from '../dtos/user.dto';
 
 export class UserRepository {
     
@@ -8,11 +9,7 @@ export class UserRepository {
         });
     }
 
-    createUser = async (data: {
-        name: string;
-        email: string;
-        password: string;
-    }) => {
+    createUser = async (data: CreateUserRepositoryDto) => {
         return prisma.user.create({ 
             data 
         });

@@ -3,6 +3,7 @@ import { CustomerRepository } from "../repositories/customer.repository";
 import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
+import { ReferenceGenerator } from "../utils/reference-generator";
 
 export class AccountService {
     private accountRepository = new AccountRepository();
@@ -14,7 +15,7 @@ export class AccountService {
 
         if (!customer) throw new ApiError(HttpStatus.NOT_FOUND, 'Customer not found');
 
-        const accountNumber = `ACC${Date.now()}`;
+        const accountNumber = ReferenceGenerator.generateAccountNumber();
 
         const accountDetails = await this.accountRepository.createAccount({
             accountNumber: accountNumber,

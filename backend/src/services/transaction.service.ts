@@ -5,14 +5,11 @@ import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
 import { prisma } from "../config/prisma";
 import { TransactionRepository } from "../repositories/transaction.repository";
+import { ReferenceGenerator } from "../utils/reference-generator";
 
 export class TransactionService {
     private accountRepository = new AccountRepository();
     private transactionRepository = new TransactionRepository();
-
-    private generateReference = (prefix: string) => {
-        return `${prefix}${Date.now()}`;
-    }
 
     private getValidatedAccount = async (accountNumber: string) => {
         const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
@@ -49,7 +46,7 @@ export class TransactionService {
         const closingBalance = openingBalance.plus(depositAmount);
 
         // Prepare Transaction
-        const transactionReference = this.generateReference("TXN");
+        const transactionReference = ReferenceGenerator.generateTransactionReference();
 
         const creditTransactionData: CreateTransactionRepositoryDto = {
             transactionReference: transactionReference,
@@ -113,7 +110,7 @@ export class TransactionService {
             throw new ApiError(HttpStatus.BAD_REQUEST, "Insufficient account balance")
         const closingBalance = openingBalance.minus(withdrawAmount);
 
-        const transactionReference = this.generateReference("TXN");
+        const transactionReference = ReferenceGenerator.generateTransactionReference();
 
         const debitTransactionData: CreateTransactionRepositoryDto = {
             transactionReference: transactionReference,
@@ -185,9 +182,9 @@ export class TransactionService {
         const receiverClosingBalance = receiverOpeningBalance.plus(transferAmount);
 
         // Prepare Transaction
-        const fundTransferReference = this.generateReference("FTR");
-        const debitTransactionReference = this.generateReference("TXN");
-        const creditTransactionReference = this.generateReference("TXN");
+        const fundTransferReference = ReferenceGenerator.generateFundTransferReference();
+        const debitTransactionReference = ReferenceGenerator.generateTransactionReference();
+        const creditTransactionReference = ReferenceGenerator.generateTransactionReference();
 
         const debitTransactionData: CreateTransactionRepositoryDto = {
             transactionReference: debitTransactionReference,

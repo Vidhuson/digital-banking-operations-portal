@@ -13,7 +13,7 @@ export class AuthController {
         return ApiResponse.success(
             res,
             HttpStatus.CREATED,
-            "Customer created successfully",
+            "User registered successfully.",
             user
         );
     }
