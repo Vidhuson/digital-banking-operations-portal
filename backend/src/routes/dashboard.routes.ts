@@ -16,4 +16,11 @@ router.get(
     asyncHandler(dashboardController.getCustomerDashboard)
 );
 
+router.get(
+    "/admin",
+    authenticate,
+    authorize(Role.ADMIN),
+    asyncHandler(dashboardController.getAdminDashboard)
+);
+
 export default router;

@@ -1,3 +1,4 @@
+import { AccountStatus } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class DashboardRepository {
@@ -18,6 +19,28 @@ export class DashboardRepository {
             orderBy: { createdAt: "desc" },
             take: 5
         });
+    };
+
+    getAdminDashboardSummary = async () => {
+        const totalCustomers = await prisma.customer.count();
+        const totalAccounts = await prisma.account.count();
+        const activeAccounts = await prisma.account.count({
+            where: { status: AccountStatus.ACTIVE }
+        });
+
+        const inactiveAccounts = await prisma.account.count({
+            where: { status: AccountStatus.CLOSED }
+        });
+
+        const totalTransactions = await prisma.transaction.count();
+
+        return {
+            totalCustomers,
+            totalAccounts,
+            activeAccounts,
+            inactiveAccounts,
+            totalTransactions
+        };
     };
 
 }

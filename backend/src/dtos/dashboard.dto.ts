@@ -19,3 +19,11 @@ export interface CustomerDashboardResponseDto {
     totalBalance: Prisma.Decimal;
     recentTransactions: RecentTransactionDto[];
 }
+
+export interface AdminDashboardResponseDto {
+    totalCustomers: number;
+    totalAccounts: number;
+    activeAccounts: number;
+    inactiveAccounts: number;
+    totalTransactions: number;
+}

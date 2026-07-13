@@ -17,4 +17,14 @@ export class DashboardController {
             dashboardData
         )
     }
+
+    getAdminDashboard = async (req: AuthRequest, res: Response) => {
+        const dashboardData = await this.dashboardService.getAdminDashboard();
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Admin dashboard retrieved successfully.",
+            dashboardData
+        )
+    }
 }

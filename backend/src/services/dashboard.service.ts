@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { CustomerDashboardResponseDto } from "../dtos/dashboard.dto";
+import { AdminDashboardResponseDto, CustomerDashboardResponseDto } from "../dtos/dashboard.dto";
 import { CustomerRepository } from "../repositories/customer.repository";
 import { DashboardRepository } from "../repositories/dashboard.repository";
 import { ApiError } from "../utils/api-error";
@@ -9,7 +9,7 @@ export class DashboardService {
     private customerRepository = new CustomerRepository();
     private dashboardRepository = new DashboardRepository();
 
-    getCustomerDashboard = async (email: string) : Promise<CustomerDashboardResponseDto> => {
+    getCustomerDashboard = async (email: string): Promise<CustomerDashboardResponseDto> => {
 
         const customer = await this.customerRepository.getCustomerByEmail(email);
 
@@ -30,4 +30,9 @@ export class DashboardService {
             recentTransactions
         };
     }
+
+    getAdminDashboard = async (): Promise<AdminDashboardResponseDto> => {
+        const dashboardSummary = await this.dashboardRepository.getAdminDashboardSummary();
+        return dashboardSummary;
+    };
 }
