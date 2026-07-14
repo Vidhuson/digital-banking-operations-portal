@@ -1,4 +1,4 @@
-import { AccountStatus, Prisma, TransactionChannel, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
+import { AccountStatus, AuditAction, AuditModule, AuditStatus, Prisma, TransactionChannel, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
 import { CreateTransactionRepositoryDto, DepositDto, FundTransferDto, WithdrawDto } from "../dtos/transaction.dto";
 import { AccountRepository } from "../repositories/account.repository";
 import { ApiError } from "../utils/api-error";
@@ -6,10 +6,13 @@ import { HttpStatus } from "../utils/http-status";
 import { prisma } from "../config/prisma";
 import { TransactionRepository } from "../repositories/transaction.repository";
 import { ReferenceGenerator } from "../utils/reference-generator";
+import { AuditLogService } from "./audit-log.service";
+import { RequestContext } from "../context/request-context";
 
 export class TransactionService {
     private accountRepository = new AccountRepository();
     private transactionRepository = new TransactionRepository();
+    private auditLogService = new AuditLogService();
 
     private getValidatedAccount = async (accountNumber: string) => {
         const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
@@ -24,6 +27,16 @@ export class TransactionService {
         return account;
     }
 
+    private getCurrentUser = () => {
+        const currentUser = RequestContext.getCurrentUser();
+        if (!currentUser)
+            throw new ApiError(
+                HttpStatus.UNAUTHORIZED,
+                "Current user not found."
+            );
+        return currentUser;
+    }
+
     deposit = async (depositData: DepositDto) => {
 
         const {
@@ -33,37 +46,45 @@ export class TransactionService {
             remarks
         } = depositData;
 
-        //Validate Request
+        // Validate Request
         if (amount <= 0)
-            throw new ApiError(HttpStatus.BAD_REQUEST, "Deposit amount must be greater than zero.");
+            throw new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Deposit amount must be greater than zero."
+            );
 
-        //Retrieve Account
+        // Current User
+        const currentUser = this.getCurrentUser();
+
+        // Retrieve Account
         const account = await this.getValidatedAccount(accountNumber);
 
-        // Calculate Balance 
+        // Calculate Balance
         const openingBalance = account.balance;
         const depositAmount = new Prisma.Decimal(amount);
         const closingBalance = openingBalance.plus(depositAmount);
 
-        // Prepare Transaction
-        const transactionReference = ReferenceGenerator.generateTransactionReference();
+        // Generate Transaction Reference
+        const transactionReference =
+            ReferenceGenerator.generateTransactionReference();
 
+        // Prepare Transaction
         const creditTransactionData: CreateTransactionRepositoryDto = {
-            transactionReference: transactionReference,
+            transactionReference,
             accountId: account.id,
-            accountNumber: accountNumber,
+            accountNumber,
             transactionType: TransactionType.DEPOSIT,
             transactionMode: TransactionMode.CREDIT,
-            transactionChannel: transactionChannel,
+            transactionChannel,
             amount: depositAmount,
-            openingBalance: openingBalance,
-            closingBalance: closingBalance,
+            openingBalance,
+            closingBalance,
             status: TransactionStatus.SUCCESS,
-            remarks: remarks
-        }
+            remarks
+        };
 
-        //Execute Database Transaction
-        await prisma.$transaction(async (tx) => {
+        // Execute Database Transaction
+        const response = await prisma.$transaction(async (tx) => {
 
             await this.accountRepository.updateAccount(
                 account.id,
@@ -75,16 +96,29 @@ export class TransactionService {
                 creditTransactionData,
                 tx
             );
+
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.TRANSACTION,
+                action: AuditAction.DEPOSIT,
+                entityReference: transactionReference,
+                status: AuditStatus.SUCCESS,
+                description: `Deposited ₹${depositAmount} into account ${account.accountNumber}.`,
+                tx
+            });
+
+            return {
+                transactionReference,
+                accountNumber: account.accountNumber,
+                depositedAmount: depositAmount,
+                availableBalance: closingBalance
+            };
+
         });
 
-        //Return Response
-        return {
-            transactionReference,
-            accountNumber: account.accountNumber,
-            depositedAmount: depositAmount,
-            availableBalance: closingBalance
-        };
-    }
+        return response;
+    };
 
     withdraw = async (withdrawData: WithdrawDto) => {
 
@@ -96,10 +130,11 @@ export class TransactionService {
         } = withdrawData;
 
 
-//Validate Request        
+        //Validate Request        
         if (amount <= 0)
             throw new ApiError(HttpStatus.BAD_REQUEST, "Withdrawal amount must be greater than zero.");
 
+        const currentUser = this.getCurrentUser();
         //Retrieve Account
         const account = await this.getValidatedAccount(accountNumber);
 
@@ -127,7 +162,7 @@ export class TransactionService {
         }
 
         //Execute Database Transaction
-        await prisma.$transaction(async (tx) => {
+        const response = await prisma.$transaction(async (tx) => {
 
             await this.accountRepository.updateAccount(
                 account.id,
@@ -139,15 +174,27 @@ export class TransactionService {
                 debitTransactionData,
                 tx
             );
+
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.TRANSACTION,
+                action: AuditAction.WITHDRAW,
+                entityReference: transactionReference,
+                status: AuditStatus.SUCCESS,
+                description: `Withdrew ₹${withdrawAmount} from account ${account.accountNumber}.`,
+                tx
+            });
+            return {
+                transactionReference,
+                accountNumber: account.accountNumber,
+                withdrawnAmount: withdrawAmount,
+                availableBalance: closingBalance
+            };
         });
 
-        // return reponse
-        return {
-            transactionReference,
-            accountNumber: account.accountNumber,
-            withdrawnAmount: withdrawAmount,
-            availableBalance: closingBalance
-        };
+        return response;
+
     }
 
     fundTransfer = async (fundTransferData: FundTransferDto) => {
@@ -163,6 +210,7 @@ export class TransactionService {
         if (amount <= 0)
             throw new ApiError(HttpStatus.BAD_REQUEST, "Transfer amount must be greater than zero.");
 
+        const currentUser = this.getCurrentUser();
         //Retrieve Account 
         if (fromAccountNumber === toAccountNumber)
             throw new ApiError(HttpStatus.BAD_REQUEST, "Sender and receiver accounts cannot be the same.");
@@ -219,7 +267,7 @@ export class TransactionService {
         };
 
         //Execute Database Transaction
-        await prisma.$transaction(async (tx) => {
+        const response = await prisma.$transaction(async (tx) => {
 
             // 1. Update sender account balance
             await this.accountRepository.updateAccount(
@@ -249,16 +297,28 @@ export class TransactionService {
                 tx
             );
 
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.TRANSACTION,
+                action: AuditAction.FUND_TRANSFER,
+                entityReference: fundTransferReference,
+                status: AuditStatus.SUCCESS,
+                description: `Transferred ₹${transferAmount} from account ${senderAccount.accountNumber} to account ${receiverAccount.accountNumber}.`,
+                tx
+            });
+
+            return {
+                fundTransferReference,
+                fromAccountNumber: senderAccount.accountNumber,
+                toAccountNumber: receiverAccount.accountNumber,
+                transferredAmount: transferAmount,
+                senderAvailableBalance: senderClosingBalance,
+                receiverAvailableBalance: receiverClosingBalance
+            }
+
         });
 
-        //return response
-        return {
-            fundTransferReference,
-            fromAccountNumber: senderAccount.accountNumber,
-            toAccountNumber: receiverAccount.accountNumber,
-            transferredAmount: transferAmount,
-            senderAvailableBalance: senderClosingBalance,
-            receiverAvailableBalance: receiverClosingBalance
-        }
+        return response
     };
 }

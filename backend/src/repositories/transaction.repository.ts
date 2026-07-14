@@ -4,8 +4,8 @@ import { CreateTransactionRepositoryDto } from "../dtos/transaction.dto";
 
 export class TransactionRepository {
     createTransaction = async (transactionData: CreateTransactionRepositoryDto, tx?: Prisma.TransactionClient) => {
-        const db = tx ?? prisma ;
-        return db.transaction.create({
+        const dbClient = tx ?? prisma;
+        return dbClient.transaction.create({
             data: transactionData
         });
     };

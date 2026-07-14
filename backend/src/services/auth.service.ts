@@ -7,6 +7,7 @@ import { ReferenceGenerator } from '../utils/reference-generator';
 import { SignupDto } from '../dtos/user.dto';
 import { AuditLogService } from './audit-log.service';
 import { AuditAction, AuditModule, AuditStatus } from '@prisma/client';
+import { prisma } from '../config/prisma';
 
 export class AuthService {
 
@@ -22,26 +23,30 @@ export class AuthService {
         const hashedPassword =
             await bcrypt.hash(data.password, 10);
 
-        const userNumber = ReferenceGenerator.generateUserNumber();
+        const response = await prisma.$transaction(async (tx) => {
 
-        const user = await this.userRepository.createUser({
-            userNumber: userNumber,
-            name: data.name,
-            email: data.email,
-            password: hashedPassword,
+            const user = await this.userRepository.createUser({
+                userNumber: ReferenceGenerator.generateUserNumber(),
+                name: data.name,
+                email: data.email,
+                password: hashedPassword,
+            }, tx);
+
+            await this.auditLogService.log({
+                userNumber: user.userNumber,
+                userRole: user.role,
+                module: AuditModule.AUTH,
+                action: AuditAction.SIGNUP,
+                entityReference: user.userNumber,
+                status: AuditStatus.SUCCESS,
+                description: `User ${user.name} registered successfully.`,
+                tx
+            });
+
+            return user;
         });
 
-        await this.auditLogService.log({
-            userNumber: user.userNumber,
-            userRole: user.role,
-            module: AuditModule.AUTH,
-            action: AuditAction.SIGNUP,
-            entityReference: user.userNumber,
-            status: AuditStatus.SUCCESS,
-            description: "User registered successfully."
-        });
-
-        return user;
+        return response;
     };
 
     login = async (reqData: {
@@ -77,7 +82,7 @@ export class AuthService {
             description: "User logged in successfully."
         });
 
-        return {
+        const response = {
             jwtToken,
             user: {
                 id: user.id,
@@ -86,5 +91,6 @@ export class AuthService {
                 role: user.role
             }
         };
+        return response;
     }
 }

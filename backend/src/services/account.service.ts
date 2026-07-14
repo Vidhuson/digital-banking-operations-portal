@@ -4,54 +4,120 @@ import { CreateAccountDto, UpdateAccountDto } from "../dtos/account.dto";
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
 import { ReferenceGenerator } from "../utils/reference-generator";
+import { AuditLogService } from "./audit-log.service";
+import { RequestContext } from "../context/request-context";
+import { AuditAction, AuditModule, AuditStatus } from "@prisma/client";
+import { prisma } from "../config/prisma";
 
 export class AccountService {
     private accountRepository = new AccountRepository();
     private customerRepository = new CustomerRepository();
+    private auditLogService = new AuditLogService();
+
+    private getCurrentUser = () => {
+        const currentUser = RequestContext.getCurrentUser();
+        if (!currentUser)
+            throw new ApiError(
+                HttpStatus.UNAUTHORIZED,
+                "Current user not found."
+            );
+        return currentUser;
+    }
 
     createAccount = async (accountData: CreateAccountDto) => {
+
+        const currentUser = this.getCurrentUser();
 
         const customer = await this.customerRepository.getCustomerById(accountData.customerId);
 
         if (!customer) throw new ApiError(HttpStatus.NOT_FOUND, 'Customer not found');
 
-        const accountNumber = ReferenceGenerator.generateAccountNumber();
+        const response = await prisma.$transaction(async (tx) => {
 
-        const accountDetails = await this.accountRepository.createAccount({
-            accountNumber: accountNumber,
-            customerId: accountData.customerId,
-            branchName: "Chennai Main Branch",
-            ifscCode: "DBOP0001001",
-            accountType: accountData.accountType
-        })
-        return accountDetails;
+            const account = await this.accountRepository.createAccount({
+                accountNumber: ReferenceGenerator.generateAccountNumber(),
+                customerId: accountData.customerId,
+                branchName: "Chennai Main Branch",
+                ifscCode: "CHEN0001001",
+                accountType: accountData.accountType
+            }, tx);
+
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.ACCOUNT,
+                action: AuditAction.CREATE_ACCOUNT,
+                entityReference: account.accountNumber,
+                status: AuditStatus.SUCCESS,
+                description: `Account ${account.accountNumber} created successfully.`,
+                tx
+            });
+
+            return account;
+        });
+
+        return response;
     }
 
     getAccounts = async () => {
         return this.accountRepository.getAccounts();
     }
 
-    getAccountById = async (id: any) => {
+    getAccountById = async (id: string) => {
         const account = await this.accountRepository.getAccountById(id);
         if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
         return account;
     }
 
-    getAccountByAccountNumber = async (accountNumber: any) => {
+    getAccountByAccountNumber = async (accountNumber: string) => {
         const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
         if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
         return account;
     }
 
     updateAccount = async (id: string, updateAccData: UpdateAccountDto) => {
+        const currentUser = this.getCurrentUser();
         const account = await this.accountRepository.getAccountById(id);
         if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
-        return this.accountRepository.updateAccount(id, updateAccData);
+
+        const response = await prisma.$transaction(async (tx) => {
+            const account = await this.accountRepository.updateAccount(id, updateAccData, tx);
+
+                await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.ACCOUNT,
+                action: AuditAction.UPDATE_ACCOUNT,
+                entityReference: account.accountNumber,
+                status: AuditStatus.SUCCESS,
+                description: `Account ${account.accountNumber} updated successfully.`,
+                tx
+            });
+
+            return account;
+        });
+        return response;
     }
 
     deleteAccount = async (id: string) => {
+        const currentUser = this.getCurrentUser();
         const account = await this.accountRepository.getAccountById(id);
         if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
-        return this.accountRepository.deleteAccount(id);
+
+        const response = await prisma.$transaction(async (tx) => {
+            const account = await this.accountRepository.deleteAccount(id, tx);
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.ACCOUNT,
+                action: AuditAction.DELETE_ACCOUNT,
+                entityReference: account.accountNumber,
+                status: AuditStatus.SUCCESS,
+                description: `Account ${account.accountNumber} deleted successfully.`,
+                tx
+            });
+            return account;
+        });
+        return response;
     }
 }

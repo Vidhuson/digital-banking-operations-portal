@@ -1,11 +1,13 @@
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { CreateCustomerDto } from '../dtos/customer.dto';
 
 export class CustomerRepository {
 
-    createCustomer = async (customerData: CreateCustomerDto) => {
-        return prisma.customer.create({
+    createCustomer = async (customerData: CreateCustomerDto, tx: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.customer.create({
             data: customerData
         });
     }
@@ -26,15 +28,17 @@ export class CustomerRepository {
         })
     }
 
-    updateCustomer = async (id: string, updateData: Partial<CreateCustomerDto>) => {
-        return prisma.customer.update({
+    updateCustomer = async (id: string, updateData: Partial<CreateCustomerDto>, tx?: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.customer.update({
             where: { id },
             data: updateData
         });
     };
 
-    deleteCustomer = async (id: string) => {
-        return prisma.customer.delete({
+    deleteCustomer = async (id: string, tx?: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.customer.delete({
             where: { id }
         });
     };

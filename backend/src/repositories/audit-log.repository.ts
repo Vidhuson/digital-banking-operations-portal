@@ -4,8 +4,8 @@ import { CreateAuditLogDto, CreateAuditLogRepositoryDto } from "../dtos/audit-lo
 
 export class AuditLogRepository {
     createAuditLog = async (auditLog: CreateAuditLogRepositoryDto, tx?: Prisma.TransactionClient) => {
-        const prismaClient = tx ?? prisma;
-        return await prismaClient.auditLog.create({
+        const dbClient = tx ?? prisma;
+        return await dbClient.auditLog.create({
             data: auditLog
         });
     }

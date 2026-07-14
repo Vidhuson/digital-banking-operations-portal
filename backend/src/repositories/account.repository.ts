@@ -4,8 +4,9 @@ import { CreateAccountRepositoryDto, UpdateAccountRepositoryDto } from "../dtos/
 
 export class AccountRepository {
 
-    createAccount = async (accountData: CreateAccountRepositoryDto) => {
-        return prisma.account.create({
+    createAccount = async (accountData: CreateAccountRepositoryDto, tx?: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.account.create({
             data: accountData
         })
     }
@@ -29,15 +30,16 @@ export class AccountRepository {
         });
     };
 
-    deleteAccount = async (id: string) => {
-        return prisma.account.delete({
+    deleteAccount = async (id: string , tx?: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.account.delete({
             where: { id }
         });
     };
 
     updateAccount = async (id: string, updateData: UpdateAccountRepositoryDto, tx?: Prisma.TransactionClient) => {
-        const db = tx ?? prisma
-        return db.account.update({
+        const dbClient = tx ?? prisma;
+        return dbClient.account.update({
             where: { id },
             data: updateData
         });
