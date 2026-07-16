@@ -1,5 +1,5 @@
-import { AccountStatus, AuditAction, AuditModule, AuditStatus, Prisma, TransactionChannel, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
-import { CreateTransactionRepositoryDto, DepositDto, FundTransferDto, WithdrawDto } from "../dtos/transaction.dto";
+import { AccountStatus, AuditAction, AuditModule, AuditStatus, Prisma, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
+import { CreateTransactionRepositoryDto, DepositDto, FundTransferDto, SearchTransactionDto, WithdrawDto } from "../dtos/transaction.dto";
 import { AccountRepository } from "../repositories/account.repository";
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
@@ -320,5 +320,10 @@ export class TransactionService {
         });
 
         return response
+    };
+
+    searchTransactions = async (filters: SearchTransactionDto) => {
+        const response = await this.transactionRepository.searchTransactions(filters);
+        return response;
     };
 }

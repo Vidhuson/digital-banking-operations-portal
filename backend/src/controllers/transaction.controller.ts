@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { TransactionService } from "../services/transaction.service";
 import { ApiResponse } from "../utils/api-response";
 import { HttpStatus } from "../utils/http-status";
-import { DepositDto, FundTransferDto, WithdrawDto } from "../dtos/transaction.dto";
+import { DepositDto, FundTransferDto, SearchTransactionDto, WithdrawDto } from "../dtos/transaction.dto";
+import { TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
 
 export class TransactionController {
     private transactionService = new TransactionService();
@@ -39,4 +40,32 @@ export class TransactionController {
             response
         )
     }
+
+    searchTransactions = async (req: Request,res: Response) => {
+
+        const {
+            transactionReference,
+            accountNumber,
+            transactionType,
+            transactionMode,
+            status
+        } = req.query;
+
+        const filters: SearchTransactionDto = {
+            transactionReference: transactionReference as string,
+            accountNumber:accountNumber as string,
+            transactionType:transactionType as TransactionType,
+            transactionMode:transactionMode as TransactionMode,
+            status:status as TransactionStatus
+        };
+
+        const response = await this.transactionService.searchTransactions(filters);
+
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Transactions retrieved successfully.",
+            response
+        );
+    };
 }

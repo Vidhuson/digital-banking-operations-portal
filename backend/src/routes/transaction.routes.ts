@@ -30,4 +30,16 @@ router.post(
     asyncHandler(transactionController.fundTransfer)
 );
 
+router.get(
+    "/",
+    authenticate,
+    authorize(
+        Role.ADMIN,
+        Role.EMPLOYEE,
+        Role.CUSTOMER
+    ),
+    transactionController.searchTransactions
+);
+
+
 export default router;

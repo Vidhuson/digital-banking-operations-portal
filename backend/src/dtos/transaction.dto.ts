@@ -25,6 +25,14 @@ export interface FundTransferDto {
     remarks?: string;
 }
 
+export interface SearchTransactionDto {
+    transactionReference?: string;
+    accountNumber?: string;
+    transactionType?: TransactionType;
+    transactionMode?: TransactionMode;
+    status?: TransactionStatus;
+}
+
 /**
  * Service -> Repository
  */
@@ -43,3 +51,4 @@ export interface CreateTransactionRepositoryDto {
     remarks?: string;
     sourceReference?: string;
 }
+
