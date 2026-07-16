@@ -6,6 +6,7 @@ import transactionRoutes from './routes/transaction.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import { errorMiddleware } from "./middleware/error.middleware";
 import { requestContextMiddleware } from './middleware/request-context.middleware';
+import auditLogRoutes from './routes/audit-log.routes';
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use('/api/v1/customers', customerRoutes);
 app.use("/api/v1/accounts", accountRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/audit-logs", auditLogRoutes);
 
 app.use(errorMiddleware);
 

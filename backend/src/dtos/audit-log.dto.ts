@@ -21,3 +21,10 @@ export interface CreateAuditLogRepositoryDto {
     status: AuditStatus;
     description: string;
 }
+
+export interface SearchAuditLogDto {
+    auditReference?: string;
+    userNumber?: string;
+    module?: AuditModule;
+    status?: AuditStatus;
+}

@@ -1,4 +1,4 @@
-import { CreateAuditLogDto } from "../dtos/audit-log.dto";
+import { CreateAuditLogDto, SearchAuditLogDto } from "../dtos/audit-log.dto";
 import { AuditLogRepository } from "../repositories/audit-log.repository";
 import { ReferenceGenerator } from "../utils/reference-generator";
 
@@ -18,4 +18,9 @@ export class AuditLogService {
             tx
         );
     }
+
+    searchAuditLogs = async (filters: SearchAuditLogDto) => {
+        return this.auditLogRepository.searchAuditLogs(filters);
+    };
+
 }
