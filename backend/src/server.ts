@@ -1,12 +1,14 @@
 import express from 'express';
+import { errorMiddleware } from "./middleware/error.middleware";
+import { requestContextMiddleware } from './middleware/request-context.middleware';
 import authRoutes from './routes/auth.routes';
 import customerRoutes from './routes/customer.routes'
 import accountRoutes from './routes/account.routes';
 import transactionRoutes from './routes/transaction.routes';
 import dashboardRoutes from './routes/dashboard.routes';
-import { errorMiddleware } from "./middleware/error.middleware";
-import { requestContextMiddleware } from './middleware/request-context.middleware';
 import auditLogRoutes from './routes/audit-log.routes';
+import employeeRoutes from './routes/employee.routes';
+import notificationRoutes from './routes/notification.routes';
 
 const app = express();
 app.use(express.json());
@@ -21,12 +23,16 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/customers', customerRoutes);
-app.use("/api/v1/accounts", accountRoutes);
-app.use("/api/v1/transactions", transactionRoutes);
-app.use("/api/v1/dashboard", dashboardRoutes);
-app.use("/api/v1/audit-logs", auditLogRoutes);
+const API_PREFIX = "/api/v1";
+
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/customers`, customerRoutes);
+app.use(`${API_PREFIX}/accounts`, accountRoutes);
+app.use(`${API_PREFIX}/transactions`, transactionRoutes);
+app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
+app.use(`${API_PREFIX}/audit-logs`, auditLogRoutes);
+app.use(`${API_PREFIX}/employees`, employeeRoutes);
+app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 
 app.use(errorMiddleware);
 

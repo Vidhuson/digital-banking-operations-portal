@@ -6,13 +6,15 @@ import { HttpStatus } from '../utils/http-status';
 import { ReferenceGenerator } from '../utils/reference-generator';
 import { SignupDto } from '../dtos/user.dto';
 import { AuditLogService } from './audit-log.service';
-import { AuditAction, AuditModule, AuditStatus } from '@prisma/client';
+import { AuditAction, AuditModule, AuditStatus, NotificationType } from '@prisma/client';
 import { prisma } from '../config/prisma';
+import { NotificationService } from './notification.service';
 
 export class AuthService {
 
     private userRepository = new UserRepository();
     private auditLogService = new AuditLogService();
+    private notificationService = new NotificationService();
 
     signup = async (data: SignupDto) => {
         const existingUser =
@@ -30,6 +32,13 @@ export class AuthService {
                 name: data.name,
                 email: data.email,
                 password: hashedPassword,
+            }, tx);
+
+            await this.notificationService.createNotification({
+                userNumber: user.userNumber,
+                title: "User Registered",
+                message: `User ${user.name} has been registered successfully.`,
+                type: NotificationType.USER
             }, tx);
 
             await this.auditLogService.log({
@@ -79,7 +88,7 @@ export class AuthService {
             action: AuditAction.LOGIN,
             entityReference: user.userNumber,
             status: AuditStatus.SUCCESS,
-            description: "User logged in successfully."
+            description: `You have logged in successfully.`,
         });
 
         const response = {

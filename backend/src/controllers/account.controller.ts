@@ -17,7 +17,7 @@ export class AccountController {
         )
     }
 
-    getAccounts = async (req: Request, res: Response) => {
+    getAccounts = async (_req: Request, res: Response) => {
         const accounts = await this.accountService.getAccounts();
         return ApiResponse.success(
             res,

@@ -18,7 +18,7 @@ export class CustomerController {
         )
     }
 
-    getCustomers = async (req: Request, res: Response) => {
+    getCustomers = async (_req: Request, res: Response) => {
         const customer = await this.customerService.getCustomers();
         return ApiResponse.success(
             res,

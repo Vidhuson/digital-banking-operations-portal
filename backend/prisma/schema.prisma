@@ -86,29 +86,40 @@ enum AuditStatus {
   FAILURE
 }
 
+enum NotificationType {
+  USER
+  CUSTOMER
+  ACCOUNT
+  TRANSACTION
+  SYSTEM
+}
+
 model User {
-  id          String @id @default(uuid())
-  userNumber  String @unique
-  name        String
-  email       String @unique
-  password    String
-  role        Role   @default(CUSTOMER)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String    @id @default(uuid())
+  userNumber String    @unique
+  name       String
+  email      String    @unique
+  password   String
+  role       Role      @default(CUSTOMER)
+  customer   Customer?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model Customer {
   id             String         @id @default(uuid())
   customerNumber String         @unique
+  userId         String         @unique
+  user           User           @relation(fields: [userId], references: [id])
   fullName       String
   email          String         @unique
   phoneNumber    String
   address        String?
   dateOfBirth    DateTime?
   status         CustomerStatus @default(ACTIVE)
+  accounts       Account[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-  accounts       Account[]
 }
 
 model Account {
@@ -150,18 +161,36 @@ model Transaction {
 }
 
 model AuditLog {
-  id               String       @id @default(uuid())
-  auditReference   String       @unique
-  userNumber       String
-  userRole         Role
-  module           AuditModule
-  action           AuditAction
-  entityReference  String?
-  status           AuditStatus
-  description      String
-  createdAt        DateTime     @default(now())
+  id              String      @id @default(uuid())
+  auditReference  String      @unique
+  userNumber      String
+  userRole        Role
+  module          AuditModule
+  action          AuditAction
+  entityReference String?
+  status          AuditStatus
+  description     String
+  createdAt       DateTime    @default(now())
+
   @@index([userNumber])
   @@index([module])
   @@index([action])
+  @@index([createdAt])
+}
+
+model Notification {
+  id                    String           @id @default(uuid())
+  notificationReference String           @unique
+  userNumber            String
+  title                 String
+  message               String
+  type                  NotificationType
+  isRead                Boolean          @default(false)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@index([notificationReference])
+  @@index([userNumber])
+  @@index([isRead])
   @@index([createdAt])
 }

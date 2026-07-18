@@ -4,14 +4,16 @@ import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
 import { ReferenceGenerator } from "../utils/reference-generator";
 import { AuditLogService } from "./audit-log.service";
-import { AuditAction, AuditModule, AuditStatus } from "@prisma/client";
+import { AuditAction, AuditModule, AuditStatus, NotificationType } from "@prisma/client";
 import { RequestContext } from "../context/request-context";
 import { prisma } from "../config/prisma";
+import { NotificationService } from "./notification.service";
 
 export class CustomerService {
 
     private customerRepository = new CustomerRepository();
     private auditLogService = new AuditLogService();
+    private notificationService = new NotificationService();
 
     private getCurrentUser = () => {
         const currentUser = RequestContext.getCurrentUser();
@@ -31,8 +33,6 @@ export class CustomerService {
 
         if (existingCustomer) throw new ApiError(HttpStatus.CONFLICT, 'Customer already exists');
 
-        const customerNumber = ReferenceGenerator.generateCustomerNumber();
-
         const createCustomerData: CreateCustomerDto = {
             ...customerData,
             customerNumber: ReferenceGenerator.generateCustomerNumber()
@@ -44,6 +44,13 @@ export class CustomerService {
                 createCustomerData,
                 tx
             );
+
+            await this.notificationService.createNotification({
+                userNumber: currentUser.userNumber,
+                title: "Customer Created",
+                message: `Customer ${customer.customerNumber} has been created successfully.`,
+                type: NotificationType.CUSTOMER
+            }, tx);
 
             await this.auditLogService.log({
                 userNumber: currentUser.userNumber,
@@ -85,6 +92,13 @@ export class CustomerService {
 
             const customer = await this.customerRepository.updateCustomer(id, customerData, tx);
 
+            await this.notificationService.createNotification({
+                userNumber: currentUser.userNumber,
+                title: "Customer Updated",
+                message: `Customer ${customer.customerNumber} has been updated successfully.`,
+                type: NotificationType.CUSTOMER
+            }, tx);
+
             await this.auditLogService.log({
                 userNumber: currentUser.userNumber,
                 userRole: currentUser.role,
@@ -112,6 +126,13 @@ export class CustomerService {
         const response = await prisma.$transaction(async (tx) => {
 
             const customer = await this.customerRepository.deleteCustomer(id, tx);
+
+            await this.notificationService.createNotification({
+                userNumber: currentUser.userNumber,
+                title: "Customer Deleted",
+                message: `Customer ${customer.customerNumber} has been deleted successfully.`,
+                type: NotificationType.CUSTOMER
+            }, tx);
 
             await this.auditLogService.log({
                 userNumber: currentUser.userNumber,

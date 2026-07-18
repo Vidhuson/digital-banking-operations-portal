@@ -1,4 +1,4 @@
-import { AccountStatus, AuditAction, AuditModule, AuditStatus, Prisma, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
+import { AccountStatus, AuditAction, AuditModule, AuditStatus, NotificationType, Prisma, TransactionMode, TransactionStatus, TransactionType } from "@prisma/client";
 import { CreateTransactionRepositoryDto, DepositDto, FundTransferDto, SearchTransactionDto, WithdrawDto } from "../dtos/transaction.dto";
 import { AccountRepository } from "../repositories/account.repository";
 import { ApiError } from "../utils/api-error";
@@ -8,11 +8,13 @@ import { TransactionRepository } from "../repositories/transaction.repository";
 import { ReferenceGenerator } from "../utils/reference-generator";
 import { AuditLogService } from "./audit-log.service";
 import { RequestContext } from "../context/request-context";
+import { NotificationService } from "./notification.service";
 
 export class TransactionService {
     private accountRepository = new AccountRepository();
     private transactionRepository = new TransactionRepository();
     private auditLogService = new AuditLogService();
+    private notificationService = new NotificationService();
 
     private getValidatedAccount = async (accountNumber: string) => {
         const account = await this.accountRepository.getAccountByAccountNumber(accountNumber);
@@ -185,6 +187,7 @@ export class TransactionService {
                 description: `Withdrew ₹${withdrawAmount} from account ${account.accountNumber}.`,
                 tx
             });
+
             return {
                 transactionReference,
                 accountNumber: account.accountNumber,

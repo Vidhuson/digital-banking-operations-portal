@@ -6,13 +6,15 @@ import { HttpStatus } from "../utils/http-status";
 import { ReferenceGenerator } from "../utils/reference-generator";
 import { AuditLogService } from "./audit-log.service";
 import { RequestContext } from "../context/request-context";
-import { AuditAction, AuditModule, AuditStatus } from "@prisma/client";
+import { AuditAction, AuditModule, AuditStatus, NotificationType } from "@prisma/client";
 import { prisma } from "../config/prisma";
+import { NotificationService } from "./notification.service";
 
 export class AccountService {
     private accountRepository = new AccountRepository();
     private customerRepository = new CustomerRepository();
     private auditLogService = new AuditLogService();
+    private notificationService = new NotificationService();
 
     private getCurrentUser = () => {
         const currentUser = RequestContext.getCurrentUser();
@@ -40,6 +42,13 @@ export class AccountService {
                 branchName: "Chennai Main Branch",
                 ifscCode: "CHEN0001001",
                 accountType: accountData.accountType
+            }, tx);
+
+            await this.notificationService.createNotification({
+                userNumber: currentUser.userNumber,
+                title: "Account Created",
+                message: `Account ${account.accountNumber} has been created successfully.`,
+                type: NotificationType.ACCOUNT
             }, tx);
 
             await this.auditLogService.log({
@@ -83,7 +92,14 @@ export class AccountService {
         const response = await prisma.$transaction(async (tx) => {
             const account = await this.accountRepository.updateAccount(id, updateAccData, tx);
 
-                await this.auditLogService.log({
+            await this.notificationService.createNotification({
+                userNumber: currentUser.userNumber,
+                title: "Account Updated",
+                message: `Account ${account.accountNumber} has been updated successfully.`,
+                type: NotificationType.ACCOUNT
+            }, tx);
+
+            await this.auditLogService.log({
                 userNumber: currentUser.userNumber,
                 userRole: currentUser.role,
                 module: AuditModule.ACCOUNT,
@@ -96,6 +112,7 @@ export class AccountService {
 
             return account;
         });
+        
         return response;
     }
 
@@ -105,7 +122,16 @@ export class AccountService {
         if (!account) throw new ApiError(HttpStatus.NOT_FOUND, "Account not found");
 
         const response = await prisma.$transaction(async (tx) => {
+
             const account = await this.accountRepository.deleteAccount(id, tx);
+
+            await this.notificationService.createNotification({
+                userNumber: currentUser.userNumber,
+                title: "Account Deleted",
+                message: `Account ${account.accountNumber} has been deleted successfully.`,
+                type: NotificationType.ACCOUNT
+            }, tx);
+
             await this.auditLogService.log({
                 userNumber: currentUser.userNumber,
                 userRole: currentUser.role,
@@ -118,6 +144,7 @@ export class AccountService {
             });
             return account;
         });
+
         return response;
     }
 }

@@ -11,6 +11,15 @@ export class ReferenceGenerator {
 
     }
 
+    private static generateDateBasedReference(prefix: string): string {
+        const date = new Date()
+            .toISOString()
+            .slice(0, 10)
+            .replace(/-/g, "");
+
+        return `${prefix}${date}${this.generateSequence(8)}`;
+    }
+
     static generateUserNumber(): string {
         return `USR${this.generateSequence(8)}`;
 
@@ -28,28 +37,18 @@ export class ReferenceGenerator {
     }
 
     static generateTransactionReference(): string {
-        const date = new Date()
-            .toISOString()
-            .slice(0, 10)
-            .replace(/-/g, "");
-        return `TXN${date}${this.generateSequence(8)}`;
+        return this.generateDateBasedReference("TXN");;
     }
 
     static generateFundTransferReference(): string {
-        const date = new Date()
-            .toISOString()
-            .slice(0, 10)
-            .replace(/-/g, "");
-
-        return `FT${date}${this.generateSequence(8)}`;
+        return this.generateDateBasedReference("FT");
     }
 
     static generateAuditReference(): string {
-        const date = new Date()
-            .toISOString()
-            .slice(0, 10)
-            .replace(/-/g, "");
+        return this.generateDateBasedReference("AUD");
+    }
 
-        return `AUD${date}${this.generateSequence(8)}`;
+    static generateNotificationReference(): string {
+        return this.generateDateBasedReference("NOT");
     }
 }

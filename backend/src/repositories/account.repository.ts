@@ -26,7 +26,18 @@ export class AccountRepository {
 
     getAccountByAccountNumber = async (accountNumber: string) => {
         return prisma.account.findUnique({
-            where: { accountNumber }
+            where: { accountNumber },
+            include: {
+    customer: {
+        include: {
+            user: {
+                select: {
+                    userNumber: true
+                }
+            }
+        }
+    }
+}
         });
     };
 

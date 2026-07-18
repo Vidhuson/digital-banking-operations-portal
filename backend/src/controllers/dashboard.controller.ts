@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { DashboardService } from "../services/dashboard.service";
 import { AuthRequest } from "../types/auth-request";
 import { ApiResponse } from "../utils/api-response";
@@ -18,7 +18,7 @@ export class DashboardController {
         )
     }
 
-    getAdminDashboard = async (req: AuthRequest, res: Response) => {
+    getAdminDashboard = async (_req: Request, res: Response) => {
         const dashboardData = await this.dashboardService.getAdminDashboard();
         return ApiResponse.success(
             res,
