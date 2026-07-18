@@ -4,16 +4,16 @@ import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
 import { ReferenceGenerator } from "../utils/reference-generator";
 import { AuditLogService } from "./audit-log.service";
-import { AuditAction, AuditModule, AuditStatus, NotificationType } from "@prisma/client";
+import { AuditAction, AuditModule, AuditStatus, CustomerStatus, NotificationType, UserStatus } from "@prisma/client";
 import { RequestContext } from "../context/request-context";
 import { prisma } from "../config/prisma";
 import { NotificationService } from "./notification.service";
-
+import { UserRepository } from "../repositories/user.repository";
 export class CustomerService {
-
     private customerRepository = new CustomerRepository();
     private auditLogService = new AuditLogService();
     private notificationService = new NotificationService();
+    private userRepository = new UserRepository();
 
     private getCurrentUser = () => {
         const currentUser = RequestContext.getCurrentUser();
@@ -80,6 +80,143 @@ export class CustomerService {
 
         return customer;
     }
+
+    getPendingCustomers = async () => {
+        return this.customerRepository.getPendingCustomers();
+    }
+
+    approveCustomer = async (customerNumber: string) => {
+
+        const currentUser = this.getCurrentUser();
+
+        const customer =
+            await this.customerRepository.getCustomerByCustomerNumber(customerNumber);
+
+        if (!customer) {
+            throw new ApiError(
+                HttpStatus.NOT_FOUND,
+                "Customer not found."
+            );
+        }
+
+        if (customer.status !== CustomerStatus.PENDING_APPROVAL) {
+            throw new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Customer is not pending approval."
+            );
+        }
+
+        const response = await prisma.$transaction(async (tx) => {
+
+            await this.customerRepository.updateCustomerStatus(
+                customer.id,
+                CustomerStatus.ACTIVE,
+                tx
+            );
+
+            await this.userRepository.updateUserStatus(
+                customer.userId,
+                UserStatus.ACTIVE,
+                tx
+            );
+
+            await this.notificationService.createNotification(
+                {
+                    userNumber: customer.user.userNumber,
+                    title: "Registration Approved",
+                    message: `Congratulations! Your customer registration (${customer.customerNumber}) has been approved. You can now log in to your account.`,
+                    type: NotificationType.USER
+                },
+                tx
+            );
+
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.CUSTOMER,
+                action: AuditAction.APPROVE_CUSTOMER,
+                entityReference: customer.customerNumber,
+                status: AuditStatus.SUCCESS,
+                description: `Customer ${customer.customerNumber} registration approved.`,
+                tx
+            });
+
+            return {
+                customerNumber: customer.customerNumber,
+                status: CustomerStatus.ACTIVE
+            };
+        });
+
+        return response;
+
+    };
+
+    rejectCustomer = async (customerNumber: string) => {
+
+        const currentUser = this.getCurrentUser();
+
+        const customer =
+            await this.customerRepository.getCustomerByCustomerNumber(customerNumber);
+
+        if (!customer) {
+            throw new ApiError(
+                HttpStatus.NOT_FOUND,
+                "Customer not found."
+            );
+        }
+
+        if (customer.status !== CustomerStatus.PENDING_APPROVAL) {
+            throw new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Customer is not pending approval."
+            );
+        }
+
+        const response = await prisma.$transaction(async (tx) => {
+
+            await this.customerRepository.updateCustomerStatus(
+                customer.id,
+                CustomerStatus.INACTIVE,
+                tx
+            );
+
+            await this.userRepository.updateUserStatus(
+                customer.userId,
+                UserStatus.INACTIVE,
+                tx
+            );
+
+            await this.notificationService.createNotification(
+                {
+                    userNumber: customer.user.userNumber,
+                    title: "Registration Rejected",
+                    message: `Your customer registration request (${customer.customerNumber}) has been rejected. Please visit your nearest branch or contact customer support for more information.`,
+                    type: NotificationType.USER
+                },
+                tx
+            );
+
+            await this.auditLogService.log({
+                userNumber: currentUser.userNumber,
+                userRole: currentUser.role,
+                module: AuditModule.CUSTOMER,
+                action: AuditAction.REJECT_CUSTOMER,
+                entityReference: customer.customerNumber,
+                status: AuditStatus.SUCCESS,
+                description: `Customer ${customer.customerNumber} registration rejected.`,
+                tx
+            });
+
+            return {
+                customerNumber: customer.customerNumber,
+                status: CustomerStatus.INACTIVE
+            };
+
+        });
+
+        return response;
+
+    };
 
     updateCustomer = async (id: string, customerData: Partial<CreateCustomerDto>) => {
         const currentUser = this.getCurrentUser();

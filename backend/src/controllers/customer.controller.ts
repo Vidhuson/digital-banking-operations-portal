@@ -39,6 +39,38 @@ export class CustomerController {
         )
     }
 
+    getPendingCustomers = async (_req: Request, res: Response) => {
+        const customer = await this.customerService.getPendingCustomers();
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            'Pending customers fetched successfully',
+            customer
+        )
+    }
+
+    approveCustomer = async (req: Request, res: Response) => {
+        const customerNumber = req.params.customerNumber as string;
+        const customer = await this.customerService.approveCustomer(customerNumber);
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            `Customer ${customer.customerNumber} approved successfully`,
+            customer
+        )
+    }
+
+    rejectCustomer = async (req: Request, res: Response) => {
+        const customerNumber = req.params.customerNumber as string;
+        const customer = await this.customerService.rejectCustomer(customerNumber);
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            `Customer ${customer.customerNumber} rejected successfully`,
+            customer
+        )
+    }
+
     updateCustomer = async (req: Request, res: Response) => {
         const id = req.params.id as string;
         const body = req.body

@@ -1,5 +1,5 @@
 
-import { Prisma } from '@prisma/client';
+import { CustomerStatus, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { CreateCustomerDto } from '../dtos/customer.dto';
 
@@ -11,12 +11,6 @@ export class CustomerRepository {
             data: customerData
         });
     }
-
-    getCustomerByEmail = async (email: string) => {
-        return prisma.customer.findUnique({
-            where: { email }
-        });
-    };
 
     getCustomers = async () => {
         return prisma.customer.findMany();
@@ -40,6 +34,41 @@ export class CustomerRepository {
         const dbClient = tx ?? prisma;
         return dbClient.customer.delete({
             where: { id }
+        });
+    };
+
+    getPendingCustomers = async () => {
+        return prisma.customer.findMany({
+            where: {
+                status: CustomerStatus.PENDING_APPROVAL
+            },
+            include: {
+                user: true
+            }
+        });
+    };
+
+    getCustomerByCustomerNumber = async (customerNumber: string) => {
+        return prisma.customer.findUnique({
+            where: {
+                customerNumber
+            },
+            include: {
+                user: true
+            }
+        });
+    };
+
+    updateCustomerStatus = async (
+        id: string,
+        status: CustomerStatus,
+        tx?: Prisma.TransactionClient
+    ) => {
+        const dbClient = tx ?? prisma;
+
+        return dbClient.customer.update({
+            where: { id },
+            data: { status }
         });
     };
 }

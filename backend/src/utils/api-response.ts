@@ -19,11 +19,13 @@ export class ApiResponse {
     static error = (
         res: Response,
         statusCode: number,
-        message: string
+        message: string,
+        data?: unknown
     ) => {
         return res.status(statusCode).json({
             success: false,
-            message
+            message,
+            data
         });
     }
 }
