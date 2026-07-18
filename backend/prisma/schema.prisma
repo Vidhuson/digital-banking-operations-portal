@@ -22,6 +22,12 @@ enum CustomerStatus {
   INACTIVE
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING_APPROVAL
+}
+
 enum AccountType {
   SAVINGS
   CURRENT
@@ -95,15 +101,20 @@ enum NotificationType {
 }
 
 model User {
-  id         String    @id @default(uuid())
-  userNumber String    @unique
-  name       String
-  email      String    @unique
-  password   String
-  role       Role      @default(CUSTOMER)
-  customer   Customer?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id           String     @id @default(uuid())
+  userNumber   String     @unique
+  name         String
+  email        String     @unique
+  password     String
+  role         Role       @default(CUSTOMER)
+  status       UserStatus @default(ACTIVE)
+  isFirstLogin Boolean    @default(true)
+
+  customer Customer?
+  employee Employee?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Customer {
@@ -111,8 +122,6 @@ model Customer {
   customerNumber String         @unique
   userId         String         @unique
   user           User           @relation(fields: [userId], references: [id])
-  fullName       String
-  email          String         @unique
   phoneNumber    String
   address        String?
   dateOfBirth    DateTime?
@@ -181,7 +190,7 @@ model AuditLog {
 model Notification {
   id                    String           @id @default(uuid())
   notificationReference String           @unique
-  userNumber            String
+  userId                String
   title                 String
   message               String
   type                  NotificationType
@@ -189,8 +198,19 @@ model Notification {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
 
-  @@index([notificationReference])
-  @@index([userNumber])
+  @@index([userId])
   @@index([isRead])
   @@index([createdAt])
+}
+
+model Employee {
+  id             String   @id @default(uuid())
+  employeeNumber String   @unique
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  department     String?
+  designation    String?
+  branchName     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
