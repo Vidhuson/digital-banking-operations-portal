@@ -90,7 +90,15 @@ export class AuthService {
                 tx
             });
 
-            return user;
+            return {
+                id: user.id,
+                userNumber: user.userNumber,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                status: user.status,
+                isFirstLogin: user.isFirstLogin
+            };
         });
 
         return response;
@@ -161,6 +169,7 @@ export class AuthService {
             jwtToken,
             user: {
                 id: user.id,
+                userNumber: user.userNumber,
                 name: user.name,
                 email: user.email,
                 role: user.role,

@@ -125,7 +125,7 @@ model Customer {
   customerNumber String         @unique
   userId         String         @unique
   user           User           @relation(fields: [userId], references: [id])
-  phoneNumber    String
+  phoneNumber    String?
   address        String?
   dateOfBirth    DateTime?
   status         CustomerStatus @default(ACTIVE)

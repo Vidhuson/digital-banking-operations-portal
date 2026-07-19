@@ -10,7 +10,7 @@ export const signUpSchema = z.object({
         .min(8, "Password must be at least 8 characters.")
         .max(20, "Password cannot exceed 20 characters."),
 
-        phoneNumber: z.string().regex(/^[6-9]\d{9}$/, "Invalid phone number."),
+        phoneNumber: z.string().regex(/^[6-9]\d{9}$/, "Invalid phone number.").optional(),
 
         address: z.string().optional(),
 
