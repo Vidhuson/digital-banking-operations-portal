@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres_db:   # PostgreSQL database servicename
     image: postgres:16    # Official PostgreSQL image downloaded from Docker Hub

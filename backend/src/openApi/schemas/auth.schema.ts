@@ -1,4 +1,6 @@
-export const authSchemas = {
+import { OpenAPIV3 } from "openapi-types";
+
+export const authSchemas: Record<string, OpenAPIV3.SchemaObject> = {
     SignupRequest: {
         type: "object",
         required: ["name", "email", "password"],
@@ -50,7 +52,7 @@ export const authSchemas = {
         }
     },
 
-    User: {
+    UserData: {
         type: "object",
         properties: {
             id: {
@@ -60,6 +62,45 @@ export const authSchemas = {
             userNumber: {
                 type: "string",
                 example: "USR91965597"
+            },
+            name: {
+                type: "string",
+                example: "John Doe"
+            },
+            email: {
+                type: "string",
+                format: "email",
+                example: "john@example.com"
+            },
+            role: {
+                type: "string",
+                enum: ["ADMIN", "EMPLOYEE", "CUSTOMER"]
+            },
+            status: {
+                type: "string",
+                enum: ["ACTIVE", "INACTIVE", "PENDING_APPROVAL"]
+            },
+            isFirstLogin: {
+                type: "boolean",
+                example: true
+            }
+        }
+    },
+
+    signedUpData : {
+        type: "object",
+        properties: {
+            id: {
+                type: "string",
+                format: "uuid"
+            },
+            userNumber: {
+                type: "string",
+                example: "USR91965597"
+            },
+            customerNumber: {
+                type: "string",
+                example: "CUST000001"
             },
             name: {
                 type: "string",
@@ -97,7 +138,7 @@ export const authSchemas = {
                 example: "User registered successfully."
             },
             data: {
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/signedUpData"
             }
         }
     },
@@ -110,7 +151,7 @@ export const authSchemas = {
                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
             },
             user: {
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/UserData"
             }
         }
     },

@@ -28,9 +28,9 @@ export class CustomerController {
         )
     }
 
-    getCustomerById = async (req: Request, res: Response) => {
-        const id = req.params.id as string
-        const customer = await this.customerService.getCustomerById(id);
+    getCustomerByCustomerNumber = async (req: Request, res: Response) => {
+        const customerNumber = req.params.customerNumber as string;
+        const customer = await this.customerService.getCustomerByCustomerNumber(customerNumber);
         return ApiResponse.success(
             res,
             HttpStatus.OK,
@@ -40,12 +40,12 @@ export class CustomerController {
     }
 
     getPendingCustomers = async (_req: Request, res: Response) => {
-        const customer = await this.customerService.getPendingCustomers();
+        const customers = await this.customerService.getPendingCustomers();
         return ApiResponse.success(
             res,
             HttpStatus.OK,
             'Pending customers fetched successfully',
-            customer
+            customers
         )
     }
 
@@ -72,9 +72,8 @@ export class CustomerController {
     }
 
     updateCustomer = async (req: Request, res: Response) => {
-        const id = req.params.id as string;
-        const body = req.body
-        const customer = await this.customerService.updateCustomer(id, body);
+        const customerNumber = req.params.customerNumber as string;
+        const customer = await this.customerService.updateCustomer(customerNumber, req.body);
         return ApiResponse.success(
             res,
             HttpStatus.OK,
@@ -84,8 +83,8 @@ export class CustomerController {
     }
 
     deleteCustomer = async (req: Request, res: Response) => {
-        const id = req.params.id as string;
-        const customer = await this.customerService.deleteCustomer(id);
+        const customerNumber = req.params.customerNumber as string;
+        const customer = await this.customerService.deleteCustomer(customerNumber);
         return ApiResponse.success(
             res,
             HttpStatus.OK,

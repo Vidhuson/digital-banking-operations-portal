@@ -57,7 +57,7 @@ export class AuthService {
                 isFirstLogin: true
             }, tx);
 
-            await this.customerRepository.createCustomer(
+            const customer = await this.customerRepository.createCustomer(
                 {
                     customerNumber: ReferenceGenerator.generateCustomerNumber(),
                     userId: user.id,
@@ -93,6 +93,7 @@ export class AuthService {
             return {
                 id: user.id,
                 userNumber: user.userNumber,
+                customerNumber: customer.customerNumber,
                 name: user.name,
                 email: user.email,
                 role: user.role,

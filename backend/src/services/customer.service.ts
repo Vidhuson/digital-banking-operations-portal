@@ -1,5 +1,5 @@
 import { CustomerRepository } from "../repositories/customer.repository";
-import { CreateCustomerDto } from '../dtos/customer.dto';
+import { BranchCreateCustomerDto, CreateCustomerDto } from '../dtos/customer.dto';
 import { ApiError } from "../utils/api-error";
 import { HttpStatus } from "../utils/http-status";
 import { ReferenceGenerator } from "../utils/reference-generator";
@@ -9,6 +9,9 @@ import { RequestContext } from "../context/request-context";
 import { prisma } from "../config/prisma";
 import { NotificationService } from "./notification.service";
 import { UserRepository } from "../repositories/user.repository";
+import bcrypt from 'bcrypt';
+import { PasswordGenerator } from "../utils/password-generator";
+
 export class CustomerService {
     private customerRepository = new CustomerRepository();
     private auditLogService = new AuditLogService();
@@ -25,59 +28,90 @@ export class CustomerService {
         return currentUser;
     }
 
-    createCustomer = async (customerData: CreateCustomerDto) => {
+    createCustomer = async (data: BranchCreateCustomerDto) => {
 
         const currentUser = this.getCurrentUser();
 
-        const existingCustomer = await this.customerRepository.getCustomerByEmail(customerData.email);
+        const existingUser = await this.userRepository.findUserByEmail(data.email);
 
-        if (existingCustomer) throw new ApiError(HttpStatus.CONFLICT, 'Customer already exists');
+        if (existingUser) {
+            throw new ApiError(
+                HttpStatus.CONFLICT,
+                "User already exists."
+            );
 
-        const createCustomerData: CreateCustomerDto = {
-            ...customerData,
-            customerNumber: ReferenceGenerator.generateCustomerNumber()
-        };
+        }
+
+        const temporaryPassword = data.temporaryPassword ?? PasswordGenerator.generate();
+
+        const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
 
         const response = await prisma.$transaction(async (tx) => {
 
+            const user = await this.userRepository.createUser({
+                userNumber: ReferenceGenerator.generateUserNumber(),
+                name: data.name,
+                email: data.email,
+                password: hashedPassword,
+                status: UserStatus.ACTIVE,
+                isFirstLogin: true
+            }, tx);
+
             const customer = await this.customerRepository.createCustomer(
-                createCustomerData,
+                {
+                    customerNumber: ReferenceGenerator.generateCustomerNumber(),
+                    userId: user.id,
+                    phoneNumber: data.phoneNumber,
+                    address: data.address,
+                    dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+                    status: CustomerStatus.ACTIVE
+                },
                 tx
             );
 
-            await this.notificationService.createNotification({
-                userNumber: currentUser.userNumber,
-                title: "Customer Created",
-                message: `Customer ${customer.customerNumber} has been created successfully.`,
-                type: NotificationType.CUSTOMER
-            }, tx);
+            await this.notificationService.createNotification(
+                {
+                    userNumber: user.userNumber,
+                    title: "Registration Submitted",
+                    message: `Welcome ${user.name}. Your account has been created successfully.`,
+                    type: NotificationType.USER
+                },
+                tx
+            );
 
             await this.auditLogService.log({
                 userNumber: currentUser.userNumber,
                 userRole: currentUser.role,
-                module: AuditModule.CUSTOMER,
-                action: AuditAction.CREATE_CUSTOMER,
-                entityReference: customer.customerNumber,
+                module: AuditModule.AUTH,
+                action: AuditAction.SIGNUP,
+                entityReference: user.userNumber,
                 status: AuditStatus.SUCCESS,
-                description: `Customer ${customer.customerNumber} created successfully.`,
+                description: "Branch assisted customer onboarding.",
                 tx
             });
 
-            return customer;
+            return {
+                id: user.id,
+                userNumber: user.userNumber,
+                customerNumber: customer.customerNumber,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                status: user.status,
+                isFirstLogin: user.isFirstLogin
+            };
         });
 
         return response;
-
     }
 
     getCustomers = async () => {
         return this.customerRepository.getCustomers();
     }
 
-    getCustomerById = async (id: string) => {
-        const customer = await this.customerRepository.getCustomerById(id);
+    getCustomerByCustomerNumber = async (customerNumber: string) => {
+        const customer = await this.customerRepository.getCustomerByCustomerNumber(customerNumber);
         if (!customer) throw new ApiError(HttpStatus.NOT_FOUND, 'Customer not found');
-
         return customer;
     }
 
@@ -89,8 +123,7 @@ export class CustomerService {
 
         const currentUser = this.getCurrentUser();
 
-        const customer =
-            await this.customerRepository.getCustomerByCustomerNumber(customerNumber);
+        const customer = await this.customerRepository.getCustomerByCustomerNumber(customerNumber);
 
         if (!customer) {
             throw new ApiError(
@@ -218,16 +251,12 @@ export class CustomerService {
 
     };
 
-    updateCustomer = async (id: string, customerData: Partial<CreateCustomerDto>) => {
+    updateCustomer = async (customerNumber: string, customerData: Partial<CreateCustomerDto>) => {
         const currentUser = this.getCurrentUser();
-
-        const existingCustomer = await this.customerRepository.getCustomerById(id);
-
-        if (!existingCustomer) throw new ApiError(HttpStatus.NOT_FOUND, "Customer not found");
 
         const response = await prisma.$transaction(async (tx) => {
 
-            const customer = await this.customerRepository.updateCustomer(id, customerData, tx);
+            const customer = await this.customerRepository.updateCustomer(customerNumber, customerData, tx);
 
             await this.notificationService.createNotification({
                 userNumber: currentUser.userNumber,
@@ -253,16 +282,12 @@ export class CustomerService {
         return response;
     }
 
-    deleteCustomer = async (id: string) => {
+    deleteCustomer = async (customerNumber: string) => {
         const currentUser = this.getCurrentUser();
-
-        const existingCustomer = await this.customerRepository.getCustomerById(id);
-
-        if (!existingCustomer) throw new ApiError(HttpStatus.NOT_FOUND, "Customer not found");
 
         const response = await prisma.$transaction(async (tx) => {
 
-            const customer = await this.customerRepository.deleteCustomer(id, tx);
+            const customer = await this.customerRepository.deleteCustomer(customerNumber, tx);
 
             await this.notificationService.createNotification({
                 userNumber: currentUser.userNumber,

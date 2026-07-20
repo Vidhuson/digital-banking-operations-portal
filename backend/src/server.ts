@@ -10,16 +10,12 @@ import auditLogRoutes from './routes/audit-log.routes';
 import employeeRoutes from './routes/employee.routes';
 import notificationRoutes from './routes/notification.routes';
 import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./config/swagger";
+import { swaggerSpec } from "./config/swagger";
 
 const app = express();
 app.use(express.json());
 app.use(requestContextMiddleware);
-app.use(
-    "/api-docs",
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec)
-);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = 5000;
 

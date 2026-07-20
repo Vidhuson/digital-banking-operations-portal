@@ -4,13 +4,21 @@ import { Role } from '@prisma/client';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/role.middleware';
 import { asyncHandler } from '../utils/async-handler';
-import { customerNumberParamSchema, updateCustomerSchema } from '../validations/customer.validation';
+import { createCustomerSchema, customerNumberParamSchema, updateCustomerSchema } from '../validations/customer.validation';
 import { validate } from '../middleware/validation.middleware';
 
 
 const router = Router();
 
 const customerController = new CustomerController();
+
+router.post(
+    '/', 
+    authenticate, 
+    authorize(Role.ADMIN, Role.EMPLOYEE),
+    validate(createCustomerSchema),
+    asyncHandler(customerController.createCustomer)
+);
 
 router.get(
     '/', 
@@ -31,7 +39,7 @@ router.get(
     authenticate, 
     authorize(Role.ADMIN, Role.EMPLOYEE), 
     validate(customerNumberParamSchema),
-    asyncHandler(customerController.getCustomerById)
+    asyncHandler(customerController.getCustomerByCustomerNumber)
 );
 
 router.put(

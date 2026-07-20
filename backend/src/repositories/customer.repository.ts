@@ -5,7 +5,7 @@ import { CreateCustomerDto } from '../dtos/customer.dto';
 
 export class CustomerRepository {
 
-    createCustomer = async (customerData: CreateCustomerDto, tx: Prisma.TransactionClient) => {
+    createCustomer = async (customerData: CreateCustomerDto, tx?: Prisma.TransactionClient) => {
         const dbClient = tx ?? prisma;
         return dbClient.customer.create({
             data: customerData
@@ -13,27 +13,18 @@ export class CustomerRepository {
     }
 
     getCustomers = async () => {
-        return prisma.customer.findMany();
-    };
-
-    getCustomerById = async (id: string) => {
-        return prisma.customer.findUnique({
-            where: { id }
-        })
-    }
-
-    updateCustomer = async (id: string, updateData: Partial<CreateCustomerDto>, tx?: Prisma.TransactionClient) => {
-        const dbClient = tx ?? prisma;
-        return dbClient.customer.update({
-            where: { id },
-            data: updateData
-        });
-    };
-
-    deleteCustomer = async (id: string, tx?: Prisma.TransactionClient) => {
-        const dbClient = tx ?? prisma;
-        return dbClient.customer.delete({
-            where: { id }
+        return prisma.customer.findMany({
+            include: {
+                user: {
+                    select: {
+                        userNumber: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true
+                    }
+                }
+            }
         });
     };
 
@@ -43,7 +34,15 @@ export class CustomerRepository {
                 status: CustomerStatus.PENDING_APPROVAL
             },
             include: {
-                user: true
+                user: {
+                    select: {
+                        userNumber: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true
+                    }
+                }
             }
         });
     };
@@ -54,16 +53,28 @@ export class CustomerRepository {
                 customerNumber
             },
             include: {
-                user: true
+                user: {
+                    select: {
+                        userNumber: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true
+                    }
+                }
             }
         });
     };
 
-    updateCustomerStatus = async (
-        id: string,
-        status: CustomerStatus,
-        tx?: Prisma.TransactionClient
-    ) => {
+    updateCustomer = async (customerNumber: string, updateData: Partial<CreateCustomerDto>, tx?: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.customer.update({
+            where: { customerNumber },
+            data: updateData
+        });
+    };
+
+    updateCustomerStatus = async ( id: string, status: CustomerStatus, tx?: Prisma.TransactionClient ) => {
         const dbClient = tx ?? prisma;
 
         return dbClient.customer.update({
@@ -71,4 +82,12 @@ export class CustomerRepository {
             data: { status }
         });
     };
+
+    deleteCustomer = async (customerNumber: string, tx?: Prisma.TransactionClient) => {
+        const dbClient = tx ?? prisma;
+        return dbClient.customer.delete({
+            where: { customerNumber }
+        });
+    };
+
 }

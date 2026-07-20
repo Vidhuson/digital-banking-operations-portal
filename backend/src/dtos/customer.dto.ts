@@ -8,3 +8,11 @@ export interface CreateCustomerDto {
   dateOfBirth?: Date;
   status: CustomerStatus;
 }
+export interface BranchCreateCustomerDto {
+    name: string;
+    email: string;
+    temporaryPassword?: string;
+    phoneNumber: string;
+    address?: string;
+    dateOfBirth?: string;
+}
