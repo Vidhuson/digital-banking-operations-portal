@@ -4,12 +4,13 @@ import { UserRepository } from '../repositories/user.repository';
 import { ApiError } from '../utils/api-error';
 import { HttpStatus } from '../utils/http-status';
 import { ReferenceGenerator } from '../utils/reference-generator';
-import { LoginDto, SignupDto } from '../dtos/user.dto';
+import { ChangePasswordDto, LoginDto, SignupDto } from '../dtos/user.dto';
 import { AuditLogService } from './audit-log.service';
 import { AuditAction, AuditModule, AuditStatus, CustomerStatus, NotificationType, UserStatus } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { NotificationService } from './notification.service';
 import { CustomerRepository } from '../repositories/customer.repository';
+import { PasswordUtil } from '../utils/password-utils';
 
 export class AuthService {
 
@@ -44,7 +45,7 @@ export class AuthService {
             }
         }
 
-        const hashedPassword = await bcrypt.hash(data.password, 10);
+        const hashedPassword = await PasswordUtil.hash(data.password);
 
         const response = await prisma.$transaction(async (tx) => {
 
@@ -131,10 +132,7 @@ export class AuthService {
                 );
         }
 
-        const isPasswordValid = await bcrypt.compare(
-            data.password,
-            user.password
-        );
+        const isPasswordValid = await PasswordUtil.compare(data.password, user.password);
 
         if (!isPasswordValid) {
             throw new ApiError(
@@ -178,5 +176,65 @@ export class AuthService {
                 isFirstLogin: user.isFirstLogin
             }
         };
+    };
+
+    changePassword = async (userId: string, data: ChangePasswordDto) => {
+
+        const user = await this.userRepository.findUserById(userId);
+
+        if (!user) {
+            throw new ApiError(
+                HttpStatus.NOT_FOUND,
+                "User not found."
+            );
+        }
+
+        const isCurrentPasswordValid = await PasswordUtil.compare(data.currentPassword, user.password);
+
+        if (!isCurrentPasswordValid) {
+            throw new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Current password is incorrect."
+            );
+
+        }
+
+        if (!user.isFirstLogin) {
+
+            throw new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Password has already been changed."
+            );
+
+        }
+
+        const hashedPassword = await PasswordUtil.hash(data.newPassword);
+
+        await prisma.$transaction(async (tx) => {
+
+            await this.userRepository.updatePassword(
+                user.id,
+                hashedPassword,
+                tx
+            );
+
+            await this.notificationService.createNotification({
+                userNumber: user.userNumber,
+                title: "Password Updated",
+                message: "Your password has been changed successfully.",
+                type: NotificationType.USER
+            }, tx);
+
+            await this.auditLogService.log({
+                userNumber: user.userNumber,
+                userRole: user.role,
+                module: AuditModule.AUTH,
+                action: AuditAction.CHANGEPASSWORD,
+                entityReference: user.userNumber,
+                status: AuditStatus.SUCCESS,
+                description: "First login password changed.",
+                tx
+            });
+        });
     };
 }

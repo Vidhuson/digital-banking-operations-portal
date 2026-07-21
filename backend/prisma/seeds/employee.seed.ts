@@ -1,5 +1,5 @@
 import { PrismaClient, Role, UserStatus } from "@prisma/client";
-import bcrypt from "bcrypt";
+import { PasswordUtil } from "../../src/utils/password-utils";
 
 export async function seedEmployee(prisma: PrismaClient) {
   const existingEmployee = await prisma.user.findUnique({
@@ -13,7 +13,7 @@ export async function seedEmployee(prisma: PrismaClient) {
     return;
   }
 
-  const password = await bcrypt.hash("Employee@123", 10);
+  const password = await PasswordUtil.hash("Employee@123");
 
   const employee = await prisma.user.create({
     data: {

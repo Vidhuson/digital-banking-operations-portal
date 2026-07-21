@@ -82,5 +82,64 @@ export const authPaths: OpenAPIV3.PathsObject = {
                 }
             }
         }
-    }
+    },
+
+    "/auth/change-password": {
+        post: {
+            tags: ["Authentication"],
+            summary: "Change temporary password",
+            description:
+                "Allows authenticated users to change their temporary password during first login.",
+
+            security: [
+                {
+                    BearerAuth: []
+                }
+            ],
+
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            $ref: "#/components/schemas/ChangePasswordRequest"
+                        }
+                    }
+                }
+            },
+
+            responses: {
+                200: {
+                    description: "Password changed successfully.",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ChangePasswordResponse"
+                            }
+                        }
+                    }
+                },
+
+                400: {
+                    $ref: "#/components/responses/BadRequest"
+                },
+
+                401: {
+                    $ref: "#/components/responses/Unauthorized"
+                },
+
+                403: {
+                    $ref: "#/components/responses/Forbidden"
+                },
+
+                404: {
+                    $ref: "#/components/responses/NotFound"
+                },
+
+                500: {
+                    $ref: "#/components/responses/InternalServerError"
+                }
+            }
+        }
+    },
 };

@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { AuthRequest } from '../types/auth-request';
 import { ApiResponse } from '../utils/api-response';
 import { HttpStatus } from '../utils/http-status';
+import { RequestContext } from '../context/request-context';
 
 export class AuthController {
     private authService = new AuthService();
@@ -28,6 +29,24 @@ export class AuthController {
         );
     }
 
+    changePassword = async (
+
+        req: Request,
+
+        res: Response
+
+    ) => {
+
+        const userId = RequestContext.getCurrentUser()?.userId as string;
+
+        await this.authService.changePassword(userId, req.body);
+
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Password updated successfully."
+        );
+    };
     //authRequest type add which contains express request + user property
     getProfile = async (req: AuthRequest, res: Response) => {
         return ApiResponse.success(

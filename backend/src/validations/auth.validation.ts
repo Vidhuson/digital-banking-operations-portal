@@ -63,3 +63,18 @@ export const loginSchema = z.object({
     password: z.string().min(1, "Password is required."),
   }),
 });
+
+
+export const changePasswordSchema = z.object({
+    body: z.object({
+        currentPassword: z.string().min(8),
+        newPassword: z.string().min(8),
+        confirmPassword: z.string().min(8)
+    }).refine(
+        data => data.newPassword === data.confirmPassword,
+        {
+            message: "Passwords do not match",
+            path: ["confirmPassword"]
+        }
+    )
+});

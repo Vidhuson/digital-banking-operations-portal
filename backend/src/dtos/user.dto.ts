@@ -20,3 +20,9 @@ export interface CreateUserRepositoryDto {
     status: UserStatus;
     isFirstLogin: boolean;
 }
+
+export interface ChangePasswordDto {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}

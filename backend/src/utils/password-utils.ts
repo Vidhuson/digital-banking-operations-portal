@@ -1,4 +1,11 @@
-export class PasswordGenerator {
+import bcrypt from "bcrypt";
+import { SecurityConfig } from "../config/security";
+
+export class PasswordUtil {
+
+    /**
+     * Generate a temporary password.
+     */
     static generate(length: number = 10): string {
 
         const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -10,7 +17,6 @@ export class PasswordGenerator {
 
         let password = "";
 
-        // Ensure at least one of each type
         password += upper[Math.floor(Math.random() * upper.length)];
         password += lower[Math.floor(Math.random() * lower.length)];
         password += numbers[Math.floor(Math.random() * numbers.length)];
@@ -25,4 +31,29 @@ export class PasswordGenerator {
             .sort(() => Math.random() - 0.5)
             .join("");
     }
+
+    /**
+     * Hash password using bcrypt + pepper.
+     */
+    static async hash(password: string): Promise<string> {
+        return bcrypt.hash(
+            password + SecurityConfig.PASSWORD_PEPPER,
+            10
+        );
+    }
+
+    /**
+     * Verify password.
+     */
+    static async compare(
+        plainPassword: string,
+        hashedPassword: string
+    ): Promise<boolean> {
+
+        return bcrypt.compare(
+            plainPassword + SecurityConfig.PASSWORD_PEPPER,
+            hashedPassword
+        );
+    }
+
 }

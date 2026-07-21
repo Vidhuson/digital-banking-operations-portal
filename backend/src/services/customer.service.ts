@@ -9,8 +9,7 @@ import { RequestContext } from "../context/request-context";
 import { prisma } from "../config/prisma";
 import { NotificationService } from "./notification.service";
 import { UserRepository } from "../repositories/user.repository";
-import bcrypt from 'bcrypt';
-import { PasswordGenerator } from "../utils/password-generator";
+import { PasswordUtil } from "../utils/password-utils";
 
 export class CustomerService {
     private customerRepository = new CustomerRepository();
@@ -42,9 +41,9 @@ export class CustomerService {
 
         }
 
-        const temporaryPassword = data.temporaryPassword ?? PasswordGenerator.generate();
+        const temporaryPassword = data.temporaryPassword ?? PasswordUtil.generate();
 
-        const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+        const hashedPassword = await PasswordUtil.hash(temporaryPassword);
 
         const response = await prisma.$transaction(async (tx) => {
 

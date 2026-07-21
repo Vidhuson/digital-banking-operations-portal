@@ -5,12 +5,6 @@ import { UserStatus } from '@prisma/client/wasm';
 
 export class UserRepository {
 
-    findUserByEmail = async (email: string) => {
-        return prisma.user.findUnique({
-            where: { email }
-        });
-    }
-
     createUser = async (data: CreateUserRepositoryDto, tx?: Prisma.TransactionClient) => {
         const dbClient = tx ?? prisma;
         return dbClient.user.create({
@@ -18,11 +12,19 @@ export class UserRepository {
         });
     }
 
-    updateUserStatus = async (
-        id: string,
-        status: UserStatus,
-        tx?: Prisma.TransactionClient
-    ) => {
+    findUserByEmail = async (email: string) => {
+        return prisma.user.findUnique({
+            where: { email }
+        });
+    }
+
+    findUserById = async (id: string) => {
+        return prisma.user.findUnique({
+            where: { id }
+        });
+    }
+
+    updateUserStatus = async (id: string, status: UserStatus, tx?: Prisma.TransactionClient) => {
 
         const dbClient = tx ?? prisma;
 
@@ -31,5 +33,18 @@ export class UserRepository {
             data: { status }
         });
 
+    };
+
+    updatePassword = async (id: string, password: string, tx?: Prisma.TransactionClient) => {
+
+        const dbClient = tx ?? prisma;
+
+        return dbClient.user.update({
+            where: { id },
+            data: {
+                password,
+                isFirstLogin: false
+            }
+        });
     };
 }

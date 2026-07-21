@@ -87,7 +87,7 @@ export const authSchemas: Record<string, OpenAPIV3.SchemaObject> = {
         }
     },
 
-    signedUpData : {
+    signedUpData: {
         type: "object",
         properties: {
             id: {
@@ -171,5 +171,42 @@ export const authSchemas: Record<string, OpenAPIV3.SchemaObject> = {
                 $ref: "#/components/schemas/LoginData"
             }
         }
-    }
+    },
+
+    ChangePasswordRequest: {
+        type: "object",
+        required: [
+            "currentPassword",
+            "newPassword",
+            "confirmPassword"
+        ],
+        properties: {
+            currentPassword: {
+                type: "string",
+                example: "Temp@123"
+            },
+            newPassword: {
+                type: "string",
+                example: "NewPassword@123"
+            },
+            confirmPassword: {
+                type: "string",
+                example: "NewPassword@123"
+            }
+        }
+    },
+
+    ChangePasswordResponse: {
+        type: "object",
+        properties: {
+            success: {
+                type: "boolean",
+                example: true
+            },
+            message: {
+                type: "string",
+                example: "Password changed successfully."
+            }
+        }
+    },
 };
