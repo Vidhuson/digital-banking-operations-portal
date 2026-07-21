@@ -9,9 +9,9 @@ export class DashboardService {
     private customerRepository = new CustomerRepository();
     private dashboardRepository = new DashboardRepository();
 
-    getCustomerDashboard = async (email: string): Promise<CustomerDashboardResponseDto> => {
+    getCustomerDashboard = async (customerNumber: string): Promise<CustomerDashboardResponseDto> => {
 
-        const customer = await this.customerRepository.getCustomerByEmail(email);
+        const customer = await this.customerRepository.getCustomerByCustomerNumber(customerNumber);
 
         if (!customer) {
             throw new ApiError(HttpStatus.NOT_FOUND, "Customer not found");
@@ -22,8 +22,8 @@ export class DashboardService {
 
         return {
             customer: {
-                customerId: customer.id,
-                fullName: customer.fullName
+                customerId: customer.customerNumber,
+                fullName: customer.user.name
             },
             totalAccounts: accountSummary._count.id,
             totalBalance: accountSummary._sum.balance ?? new Prisma.Decimal(0),

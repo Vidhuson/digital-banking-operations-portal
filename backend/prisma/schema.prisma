@@ -193,7 +193,7 @@ model AuditLog {
 model Notification {
   id                    String           @id @default(uuid())
   notificationReference String           @unique
-  userId                String
+  userNumber            String
   title                 String
   message               String
   type                  NotificationType
@@ -201,7 +201,7 @@ model Notification {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
 
-  @@index([userId])
+  @@index([userNumber])
   @@index([isRead])
   @@index([createdAt])
 }

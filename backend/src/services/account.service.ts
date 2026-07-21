@@ -26,11 +26,11 @@ export class AccountService {
         return currentUser;
     }
 
-    createAccount = async (accountData: CreateAccountDto) => {
+    createAccount = async (data: CreateAccountDto) => {
 
         const currentUser = this.getCurrentUser();
 
-        const customer = await this.customerRepository.getCustomerById(accountData.customerId);
+        const customer = await this.customerRepository.getCustomerByCustomerNumber(data.customerNumber);
 
         if (!customer) throw new ApiError(HttpStatus.NOT_FOUND, 'Customer not found');
 
@@ -38,10 +38,10 @@ export class AccountService {
 
             const account = await this.accountRepository.createAccount({
                 accountNumber: ReferenceGenerator.generateAccountNumber(),
-                customerId: accountData.customerId,
+                customerId: data.customerNumber,
                 branchName: "Chennai Main Branch",
                 ifscCode: "CHEN0001001",
-                accountType: accountData.accountType
+                accountType: data.accountType
             }, tx);
 
             await this.notificationService.createNotification({

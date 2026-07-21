@@ -6,7 +6,7 @@ import { AccountStatus, AccountType, Prisma } from "@prisma/client";
  * Controller -> Service ie..,
  */
 export interface CreateAccountDto {
-    customerId: string;
+    customerNumber: string;
     accountType: AccountType;
 }
 
