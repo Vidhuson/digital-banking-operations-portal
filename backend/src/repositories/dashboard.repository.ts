@@ -3,44 +3,78 @@ import { prisma } from "../config/prisma";
 
 export class DashboardRepository {
 
-    getAccountSummary = async (customerId: string) => {
-        return prisma.account.aggregate({
-            where: { customerId },
-            _count: { id: true },
-            _sum: { balance: true }
-        });
-    };
+    getCustomerDashboard = async (userNumber: string) => {
 
-    getRecentTransactions = async (customerId: string) => {
-        return prisma.transaction.findMany({
+        //Get customer
+        const customer = await prisma.customer.findFirst({
             where: {
-                account: { customerId }
+                user: {
+                    userNumber
+                }
             },
-            orderBy: { createdAt: "desc" },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        userNumber: true,
+                        name: true,
+                        email: true
+                    }
+                }
+            }
+        });
+        if (!customer) {
+            return null;
+        }
+
+        //Accounts
+        const accounts = await prisma.account.findMany({
+            where: {
+                customerId: customer.id
+            },
+            orderBy: {
+                createdAt: "asc"
+            }
+        });
+
+        //Recent Transactions
+        const recentTransactions = await prisma.transaction.findMany({
+            where: {
+                account: {
+                    customerId: customer.id
+                }
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
             take: 5
         });
-    };
 
-    getAdminDashboardSummary = async () => {
-        const totalCustomers = await prisma.customer.count();
-        const totalAccounts = await prisma.account.count();
-        const activeAccounts = await prisma.account.count({
-            where: { status: AccountStatus.ACTIVE }
-        });
-
-        const inactiveAccounts = await prisma.account.count({
-            where: { status: AccountStatus.CLOSED }
-        });
-
-        const totalTransactions = await prisma.transaction.count();
+        //Unread Notification Count
+        const unreadNotificationCount = await prisma.notification.count({
+                where: {
+                    userNumber,
+                    isRead: false
+                }
+            });
+        
+        //Recent Notifications 
+        const recentNotifications = await prisma.notification.findMany({
+                where: {
+                    userNumber,
+                },
+                orderBy: {
+                    createdAt: "desc"
+                },
+                take: 3
+            });
 
         return {
-            totalCustomers,
-            totalAccounts,
-            activeAccounts,
-            inactiveAccounts,
-            totalTransactions
+            customer,
+            accounts,
+            recentTransactions,
+            unreadNotificationCount,
+            recentNotifications
         };
     };
-
 }

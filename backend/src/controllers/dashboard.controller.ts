@@ -5,25 +5,14 @@ import { ApiResponse } from "../utils/api-response";
 import { HttpStatus } from "../utils/http-status";
 
 export class DashboardController {
-    private dashboardService = new DashboardService();
+    private readonly dashboardService = new DashboardService();
 
-    getCustomerDashboard = async (req: AuthRequest, res: Response) => {
-        const email = req.user?.email as string;
-        const dashboardData = await this.dashboardService.getCustomerDashboard(email);
+    getCustomerDashboard = async (_req: Request, res: Response) => {
+        const dashboardData = await this.dashboardService.getCustomerDashboard();
         return ApiResponse.success(
             res,
             HttpStatus.OK,
             "Customer dashboard retrieved successfully.",
-            dashboardData
-        )
-    }
-
-    getAdminDashboard = async (_req: Request, res: Response) => {
-        const dashboardData = await this.dashboardService.getAdminDashboard();
-        return ApiResponse.success(
-            res,
-            HttpStatus.OK,
-            "Admin dashboard retrieved successfully.",
             dashboardData
         )
     }

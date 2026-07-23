@@ -6,6 +6,8 @@ import { customerPaths } from "./customer.swagger";
 import { authSchemas } from "./schemas/auth.schema";
 import { commonSchemas } from "./schemas/common.schema";
 import { customerSchemas } from "./schemas/customer.schema";
+import { dashboardPaths } from "./dashboard.swagger";
+import { dashboardSchemas } from "./schemas/dashboard.schema";
 
 export const openApiDocument: OpenAPIV3.Document = {
     openapi: "3.0.0",
@@ -31,19 +33,24 @@ export const openApiDocument: OpenAPIV3.Document = {
         {
             name: "Customers",
             description: "Customer Management APIs"
+        },
+        {
+            name: "Dashboard",
+            description: "Dashboard APIs"
         }
     ],
-
     paths: {
         ...authPaths,
-        ...customerPaths
+        ...customerPaths,
+        ...dashboardPaths
     },
 
     components: {
         schemas: {
             ...commonSchemas,
             ...authSchemas,
-            ...customerSchemas
+            ...customerSchemas,
+            ...dashboardSchemas
         },
 
         securitySchemes: {
