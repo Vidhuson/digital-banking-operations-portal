@@ -11,7 +11,7 @@ export class NotificationController {
     getNotifications = async (req: AuthRequest, res: Response) => {
 
         const userNumber = req.user!.userNumber;
-        
+
         const notifications = await this.notificationService.getNotifications(userNumber);
 
         return ApiResponse.success(
@@ -21,6 +21,20 @@ export class NotificationController {
             notifications
         );
 
+    };
+
+    getUnreadNotifications = async (req: AuthRequest, res: Response) => {
+
+        const userNumber = req.user!.userNumber;
+
+        const notifications = await this.notificationService.getUnreadNotifications(userNumber);
+
+        return ApiResponse.success(
+            res,
+            HttpStatus.OK,
+            "Unread notifications retrieved successfully.",
+            notifications
+        );
     };
 
     markAsRead = async (req: AuthRequest, res: Response) => {
@@ -50,7 +64,5 @@ export class NotificationController {
             "All notifications marked as read.",
             null
         );
-
     };
-
 }

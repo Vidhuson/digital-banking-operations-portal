@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { CreateNotificationDto } from "../dtos/notification.dto";   
+import { CreateNotificationDto } from "../dtos/notification.dto";
 import { prisma } from "../config/prisma";
 
 export class NotificationRepository {
@@ -22,6 +22,18 @@ export class NotificationRepository {
         });
 
     };
+
+    getUnreadNotifications = async (userNumber: string) => {
+        return await prisma.notification.findMany({
+            where: {
+                userNumber,
+                isRead: false
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        });
+    }
 
     markAsRead = async (notificationReference: string) => {
         return await prisma.notification.update({
@@ -47,5 +59,4 @@ export class NotificationRepository {
         });
 
     };
-
 }

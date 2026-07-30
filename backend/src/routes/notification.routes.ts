@@ -16,11 +16,11 @@ router.get(
     asyncHandler(notificationController.getNotifications)
 );
 
-router.patch(
-    "/:notificationReference/read",
+router.get(
+    "/unread",
     authenticate,
     authorize(Role.ADMIN, Role.EMPLOYEE, Role.CUSTOMER),
-    asyncHandler(notificationController.markAsRead)
+    asyncHandler(notificationController.getUnreadNotifications)
 );
 
 router.patch(
@@ -28,6 +28,13 @@ router.patch(
     authenticate,
     authorize(Role.ADMIN, Role.EMPLOYEE, Role.CUSTOMER),
     asyncHandler(notificationController.markAllAsRead)
+);
+
+router.patch(
+    "/:notificationReference/read",
+    authenticate,
+    authorize(Role.ADMIN, Role.EMPLOYEE, Role.CUSTOMER),
+    asyncHandler(notificationController.markAsRead)
 );
 
 export default router;

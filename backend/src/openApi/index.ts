@@ -8,6 +8,10 @@ import { commonSchemas } from "./schemas/common.schema";
 import { customerSchemas } from "./schemas/customer.schema";
 import { dashboardPaths } from "./dashboard.swagger";
 import { dashboardSchemas } from "./schemas/dashboard.schema";
+import { notificationPaths } from "./notification.swagger";
+import { notificationSchemas } from "./schemas/notification.schema";
+import { profileSchemas } from "./schemas/profile.schema";
+import { profilePaths } from "./profile.swagger";
 
 export const openApiDocument: OpenAPIV3.Document = {
     openapi: "3.0.0",
@@ -37,12 +41,22 @@ export const openApiDocument: OpenAPIV3.Document = {
         {
             name: "Dashboard",
             description: "Dashboard APIs"
+        },
+        {
+            name: "Notification",
+            description: "Notification APIs"
+        },
+        {
+            name: "Profile",
+            description: "Profile APIs"
         }
     ],
     paths: {
         ...authPaths,
         ...customerPaths,
-        ...dashboardPaths
+        ...dashboardPaths,
+        ...notificationPaths,
+        ...profilePaths
     },
 
     components: {
@@ -50,7 +64,9 @@ export const openApiDocument: OpenAPIV3.Document = {
             ...commonSchemas,
             ...authSchemas,
             ...customerSchemas,
-            ...dashboardSchemas
+            ...dashboardSchemas,
+            ...notificationSchemas,
+            ...profileSchemas
         },
 
         securitySchemes: {

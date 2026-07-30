@@ -1,36 +1,11 @@
 import { z } from "zod";
-
-/**
- * ----------------------------------------------------------------
- * Common Schemas
- * ----------------------------------------------------------------
- */
-
-const nameSchema = z
-  .string()
-  .trim()
-  .min(3, "Name must be at least 3 characters.");
-
-const emailSchema = z
-  .string()
-  .trim()
-  .email("Invalid email address.");
+import { addressSchema, dateSchema, emailSchema, nameSchema, phoneNumberSchema } from "./common.validation";
 
 const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters.")
   .max(20, "Password cannot exceed 20 characters.");
 
-const phoneNumberSchema = z
-  .string()
-  .regex(/^[6-9]\d{9}$/, "Invalid phone number.");
-
-const addressSchema = z
-  .string()
-  .trim();
-
-const dateOfBirthSchema = z
-  .string();
 
 /**
  * ----------------------------------------------------------------
@@ -46,7 +21,7 @@ export const signUpSchema = z.object({
     password: passwordSchema,
     phoneNumber: phoneNumberSchema.optional(),
     address: addressSchema.optional(),
-    dateOfBirth: dateOfBirthSchema.optional(),
+    dateOfBirth: dateSchema.optional(),
   }),
 });
 
@@ -64,7 +39,12 @@ export const loginSchema = z.object({
   }),
 });
 
-
+/**
+ * ----------------------------------------------------------------
+ * change-password
+ * POST /auth/change-password
+ * ----------------------------------------------------------------
+ */
 export const changePasswordSchema = z.object({
     body: z.object({
         currentPassword: z.string().min(8),

@@ -23,11 +23,36 @@ export class NotificationService {
 
     getNotifications = async (userNumber: string) => {
 
-        return await this.notificationRepository.getNotifications(
+        const notifications = await this.notificationRepository.getNotifications(
             userNumber
         );
 
+        return notifications.map(notification => ({
+            notificationReference: notification.notificationReference,
+            title: notification.title,
+            message: notification.message,
+            type: notification.type,
+            isRead: notification.isRead,
+            createdAt: notification.createdAt
+        }));
+
     };
+
+    getUnreadNotifications = async (userNumber : string) => {
+
+    const notifications = await this.notificationRepository.getUnreadNotifications(
+        userNumber
+    );
+
+    return notifications.map(notification => ({
+        notificationReference: notification.notificationReference,
+        title: notification.title,
+        message: notification.message,
+        type: notification.type,
+        isRead: notification.isRead,
+        createdAt: notification.createdAt
+    }));
+}
 
     markAsRead = async (notificationReference: string) => {
 

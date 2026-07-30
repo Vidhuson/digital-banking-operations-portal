@@ -2,6 +2,9 @@
 import { CustomerStatus, Prisma } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { CreateCustomerDto } from '../dtos/customer.dto';
+import { UpdateProfileDto } from '../dtos/profile.dto';
+import { HttpStatus } from '../utils/http-status';
+import { ApiError } from '../utils/api-error';
 
 export class CustomerRepository {
 
@@ -74,7 +77,7 @@ export class CustomerRepository {
         });
     };
 
-    updateCustomerStatus = async ( id: string, status: CustomerStatus, tx?: Prisma.TransactionClient ) => {
+    updateCustomerStatus = async (id: string, status: CustomerStatus, tx?: Prisma.TransactionClient) => {
         const dbClient = tx ?? prisma;
 
         return dbClient.customer.update({
@@ -90,4 +93,42 @@ export class CustomerRepository {
         });
     };
 
+    getMyProfile = async (userNumber: string) => {
+        return await prisma.customer.findFirst({
+            where: {
+                user: {
+                    userNumber
+                }
+            },
+            include: {
+                user: {
+                    select: {
+                        userNumber: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        status: true
+                    }
+                }
+            }
+        });
+    }
+
+    updateMyProfile = async (userNumber: string, profile: UpdateProfileDto) => {
+
+        const customer = await this.getMyProfile(userNumber);
+
+        if (!customer) throw new ApiError(HttpStatus.NOT_FOUND, 'Profile not found');
+
+        return await prisma.customer.update({
+            where: {
+                id: customer.id
+            },
+            data: {
+                phoneNumber: profile.phoneNumber,
+                address: profile.address,
+                dateOfBirth: profile.dateOfBirth
+            }
+        });
+    }
 }

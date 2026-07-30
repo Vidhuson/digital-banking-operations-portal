@@ -9,6 +9,7 @@ import dashboardRoutes from './routes/dashboard.routes';
 import auditLogRoutes from './routes/audit-log.routes';
 import employeeRoutes from './routes/employee.routes';
 import notificationRoutes from './routes/notification.routes';
+import profileRoutes from './routes/profile.routes';
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 
@@ -36,6 +37,7 @@ app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
 app.use(`${API_PREFIX}/audit-logs`, auditLogRoutes);
 app.use(`${API_PREFIX}/employees`, employeeRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
+app.use(`${API_PREFIX}/profile`, profileRoutes);
 
 app.use(errorMiddleware);
 
