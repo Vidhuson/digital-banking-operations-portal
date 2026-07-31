@@ -104,6 +104,26 @@ enum NotificationType {
   SYSTEM
 }
 
+enum SupportCategory {
+  ACCOUNT
+  TRANSACTION
+  TECHNICAL
+  OTHER
+}
+
+enum SupportPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SupportStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 model User {
   id           String     @id @default(uuid())
   userNumber   String     @unique
@@ -122,17 +142,18 @@ model User {
 }
 
 model Customer {
-  id             String         @id @default(uuid())
-  customerNumber String         @unique
-  userId         String         @unique
-  user           User           @relation(fields: [userId], references: [id])
+  id             String          @id @default(uuid())
+  customerNumber String          @unique
+  userId         String          @unique
+  user           User            @relation(fields: [userId], references: [id])
   phoneNumber    String?
   address        String?
   dateOfBirth    DateTime?
-  status         CustomerStatus @default(ACTIVE)
+  status         CustomerStatus  @default(ACTIVE)
   accounts       Account[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  SupportTicket  SupportTicket[]
 }
 
 model Account {
@@ -217,4 +238,18 @@ model Employee {
   branchName     String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model SupportTicket {
+  id           String          @id @default(uuid())
+  ticketNumber String          @unique
+  customerId   String
+  subject      String
+  description  String
+  category     SupportCategory
+  priority     SupportPriority
+  status       SupportStatus   @default(OPEN)
+  customer     Customer        @relation(fields: [customerId], references: [id])
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }

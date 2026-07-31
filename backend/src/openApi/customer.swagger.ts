@@ -3,7 +3,7 @@ import { OpenAPIV3 } from "openapi-types";
 export const customerPaths: OpenAPIV3.PathsObject = {
     "/customers": {
         post: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Create Customer",
             description: "Creates a new customer.",
             security: [
@@ -51,7 +51,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
         },
 
         get: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Get All Customers",
             description: "Returns all registered customers.",
             security: [
@@ -85,7 +85,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
 
     "/customers/pending": {
         get: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Get Pending Customers",
             description: "Returns all customers awaiting approval.",
             security: [
@@ -119,7 +119,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
 
     "/customers/{customerNumber}": {
         get: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Get Customer",
             description: "Returns customer details using customer number.",
             security: [
@@ -159,7 +159,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
         },
 
         put: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Update Customer",
             description: "Updates an existing customer's details.",
             security: [
@@ -212,7 +212,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
         },
 
         delete: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Delete Customer",
             description: "Deletes a customer.",
             security: [
@@ -247,7 +247,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
 
     "/customers/{customerNumber}/approve": {
         patch: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Approve Customer",
             description: "Approves a pending customer.",
             security: [
@@ -292,7 +292,7 @@ export const customerPaths: OpenAPIV3.PathsObject = {
 
     "/customers/{customerNumber}/reject": {
         patch: {
-            tags: ["Customers"],
+            tags: ["Customer"],
             summary: "Reject Customer",
             description: "Rejects a pending customer.",
             security: [

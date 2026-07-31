@@ -51,4 +51,8 @@ export class ReferenceGenerator {
     static generateNotificationReference(): string {
         return this.generateDateBasedReference("NOT");
     }
+
+    static generateSupportReference(): string {
+    return this.generateDateBasedReference("TKT");
+}
 }

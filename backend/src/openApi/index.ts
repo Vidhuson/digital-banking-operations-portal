@@ -12,6 +12,8 @@ import { notificationPaths } from "./notification.swagger";
 import { notificationSchemas } from "./schemas/notification.schema";
 import { profileSchemas } from "./schemas/profile.schema";
 import { profilePaths } from "./profile.swagger";
+import { supportSchemas } from "./schemas/support.schema";
+import { supportPaths } from "./support.swagger";
 
 export const openApiDocument: OpenAPIV3.Document = {
     openapi: "3.0.0",
@@ -35,7 +37,7 @@ export const openApiDocument: OpenAPIV3.Document = {
             description: "Authentication APIs"
         },
         {
-            name: "Customers",
+            name: "Customer",
             description: "Customer Management APIs"
         },
         {
@@ -47,6 +49,10 @@ export const openApiDocument: OpenAPIV3.Document = {
             description: "Notification APIs"
         },
         {
+            name: "Support",
+            description: "Customer Support APIs"
+        },
+        {
             name: "Profile",
             description: "Profile APIs"
         }
@@ -56,7 +62,8 @@ export const openApiDocument: OpenAPIV3.Document = {
         ...customerPaths,
         ...dashboardPaths,
         ...notificationPaths,
-        ...profilePaths
+        ...profilePaths,
+        ...supportPaths
     },
 
     components: {
@@ -66,7 +73,8 @@ export const openApiDocument: OpenAPIV3.Document = {
             ...customerSchemas,
             ...dashboardSchemas,
             ...notificationSchemas,
-            ...profileSchemas
+            ...profileSchemas,
+            ...supportSchemas
         },
 
         securitySchemes: {

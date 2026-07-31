@@ -1,19 +1,104 @@
 import { OpenAPIV3 } from "openapi-types";
 
-export const notificationPaths: OpenAPIV3.PathsObject = {
+export const supportPaths: OpenAPIV3.PathsObject = {
 
-    "/notifications": {
+    /**
+     * ---------------------------------------------------------
+     * POST /support
+     * ---------------------------------------------------------
+     */
+
+    "/support": {
+
+        post: {
+
+            tags: [
+                "Support"
+            ],
+
+            summary: "Create Support Ticket",
+
+            description: "Creates a new support ticket for the authenticated customer.",
+
+            security: [
+                {
+                    BearerAuth: []
+                }
+            ],
+
+            requestBody: {
+
+                required: true,
+
+                content: {
+
+                    "application/json": {
+
+                        schema: {
+                            $ref: "#/components/schemas/CreateSupportRequest"
+                        }
+
+                    }
+
+                }
+
+            },
+
+            responses: {
+
+                "201": {
+
+                    description: "Support ticket created successfully.",
+
+                    content: {
+
+                        "application/json": {
+
+                            schema: {
+                                $ref: "#/components/schemas/CreateSupportResponse"
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                "400": {
+                    $ref: "#/components/responses/BadRequest"
+                },
+
+                "401": {
+                    $ref: "#/components/responses/Unauthorized"
+                },
+
+                "403": {
+                    $ref: "#/components/responses/Forbidden"
+                },
+
+                "500": {
+                    $ref: "#/components/responses/InternalServerError"
+                }
+
+            }
+
+        },
+
+        /**
+         * ---------------------------------------------------------
+         * GET /support
+         * ---------------------------------------------------------
+         */
 
         get: {
 
             tags: [
-                "Notification"
+                "Support"
             ],
 
-            summary: "Get Notifications",
+            summary: "Get My Support Tickets",
 
-            description:
-                "Retrieves all notifications for the authenticated user.",
+            description: "Retrieves all support tickets raised by the authenticated customer.",
 
             security: [
                 {
@@ -24,14 +109,21 @@ export const notificationPaths: OpenAPIV3.PathsObject = {
             responses: {
 
                 "200": {
-                    description: "Notifications retrieved successfully.",
+
+                    description: "Support tickets retrieved successfully.",
+
                     content: {
+
                         "application/json": {
+
                             schema: {
-                                $ref: "#/components/schemas/NotificationListResponse"
+                                $ref: "#/components/schemas/SupportListResponse"
                             }
+
                         }
+
                     }
+
                 },
 
                 "400": {
@@ -49,124 +141,30 @@ export const notificationPaths: OpenAPIV3.PathsObject = {
                 "500": {
                     $ref: "#/components/responses/InternalServerError"
                 }
+
             }
+
         }
+
     },
 
-    "/notifications/unread": {
+    /**
+     * ---------------------------------------------------------
+     * GET /support/{ticketNumber}
+     * ---------------------------------------------------------
+     */
+
+    "/support/{ticketNumber}": {
 
         get: {
 
             tags: [
-                "Notification"
+                "Support"
             ],
 
-            summary: "Get Unread Notifications",
+            summary: "Get Support Ticket Details",
 
-            description:
-                "Retrieves all unread notifications for the authenticated user.",
-
-            security: [
-                {
-                    BearerAuth: []
-                }
-            ],
-
-            responses: {
-
-                "200": {
-                    description: "Unread notifications retrieved successfully.",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                $ref: "#/components/schemas/NotificationListResponse"
-                            }
-                        }
-                    }
-                },
-
-                "400": {
-                    $ref: "#/components/responses/BadRequest"
-                },
-
-                "401": {
-                    $ref: "#/components/responses/Unauthorized"
-                },
-
-                "403": {
-                    $ref: "#/components/responses/Forbidden"
-                },
-
-                "500": {
-                    $ref: "#/components/responses/InternalServerError"
-                }
-            }
-        }
-    },
-
-    "/notifications/read-all": {
-
-        patch: {
-
-            tags: [
-                "Notification"
-            ],
-
-            summary: "Mark All Notifications As Read",
-
-            description:
-                "Marks all unread notifications as read for the authenticated user.",
-
-            security: [
-                {
-                    BearerAuth: []
-                }
-            ],
-
-            responses: {
-
-                "200": {
-                    description: "All notifications marked as read successfully.",
-                    content: {
-                        "application/json": {
-                            schema: {
-                                $ref: "#/components/schemas/NotificationReadAllResponse"
-                            }
-                        }
-                    }
-                },
-
-                "400": {
-                    $ref: "#/components/responses/BadRequest"
-                },
-
-                "401": {
-                    $ref: "#/components/responses/Unauthorized"
-                },
-
-                "403": {
-                    $ref: "#/components/responses/Forbidden"
-                },
-
-                "500": {
-                    $ref: "#/components/responses/InternalServerError"
-                }
-            }
-        }
-    },
-
-    "/notifications/{notificationReference}/read": {
-
-        patch: {
-
-            tags: [
-                "Notification"
-            ],
-
-            summary: "Mark Notification As Read",
-
-            description:
-                "Marks a notification as read using the notification reference.",
+            description: "Retrieves a support ticket by ticket number.",
 
             security: [
                 {
@@ -175,29 +173,47 @@ export const notificationPaths: OpenAPIV3.PathsObject = {
             ],
 
             parameters: [
+
                 {
-                    name: "notificationReference",
+
+                    name: "ticketNumber",
+
                     in: "path",
+
                     required: true,
-                    description: "Unique notification reference",
+
+                    description: "Unique support ticket number.",
+
                     schema: {
+
                         type: "string",
-                        example: "NOT100001"
+
+                        example: "SUP000001"
+
                     }
+
                 }
+
             ],
 
             responses: {
 
                 "200": {
-                    description: "Notification marked as read successfully.",
+
+                    description: "Support ticket retrieved successfully.",
+
                     content: {
+
                         "application/json": {
+
                             schema: {
-                                $ref: "#/components/schemas/NotificationReadResponse"
+                                $ref: "#/components/schemas/SupportDetailsResponse"
                             }
+
                         }
+
                     }
+
                 },
 
                 "400": {
@@ -219,7 +235,11 @@ export const notificationPaths: OpenAPIV3.PathsObject = {
                 "500": {
                     $ref: "#/components/responses/InternalServerError"
                 }
+
             }
+
         }
+
     }
+
 };
