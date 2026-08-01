@@ -13,6 +13,7 @@ import profileRoutes from './routes/profile.routes';
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
 import supportRoutes from './routes/support.routes';
+import statementRoutes from './routes/statement.routes';
 
 const app = express();
 app.use(express.json());
@@ -40,7 +41,7 @@ app.use(`${API_PREFIX}/employees`, employeeRoutes);
 app.use(`${API_PREFIX}/notifications`, notificationRoutes);
 app.use(`${API_PREFIX}/profile`, profileRoutes);
 app.use(`${API_PREFIX}/support`, supportRoutes);
-
+app.use(`${API_PREFIX}/statements`, statementRoutes);
 
 app.use(errorMiddleware);
 
