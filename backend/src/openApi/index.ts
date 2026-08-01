@@ -2,10 +2,18 @@ import { OpenAPIV3 } from "openapi-types";
 
 import { authPaths } from "./auth.swagger";
 import { customerPaths } from "./customer.swagger";
+import { accountPaths } from "./account.swagger";
+import { transactionPaths } from "./transaction.swagger";
+import { auditLogPaths } from "./audit-log.swagger";
+import { employeePaths } from "./employee.swagger";
 
 import { authSchemas } from "./schemas/auth.schema";
 import { commonSchemas } from "./schemas/common.schema";
 import { customerSchemas } from "./schemas/customer.schema";
+import { accountSchemas } from "./schemas/account.schema";
+import { transactionSchemas } from "./schemas/transaction.schema";
+import { auditLogSchemas } from "./schemas/audit-log.schema";
+import { employeeSchemas } from "./schemas/employee.schema";
 import { dashboardPaths } from "./dashboard.swagger";
 import { dashboardSchemas } from "./schemas/dashboard.schema";
 import { notificationPaths } from "./notification.swagger";
@@ -14,6 +22,8 @@ import { profileSchemas } from "./schemas/profile.schema";
 import { profilePaths } from "./profile.swagger";
 import { supportSchemas } from "./schemas/support.schema";
 import { supportPaths } from "./support.swagger";
+import { statementPaths } from "./statement.swagger";
+import { statementSchemas } from "./schemas/statement.schema";
 
 export const openApiDocument: OpenAPIV3.Document = {
     openapi: "3.0.0",
@@ -41,6 +51,22 @@ export const openApiDocument: OpenAPIV3.Document = {
             description: "Customer Management APIs"
         },
         {
+            name: "Account",
+            description: "Account Management APIs"
+        },
+        {
+            name: "Transaction",
+            description: "Transaction APIs"
+        },
+        {
+            name: "AuditLog",
+            description: "Audit Log APIs"
+        },
+        {
+            name: "Employee",
+            description: "Employee Dashboard APIs"
+        },
+        {
             name: "Dashboard",
             description: "Dashboard APIs"
         },
@@ -55,15 +81,24 @@ export const openApiDocument: OpenAPIV3.Document = {
         {
             name: "Profile",
             description: "Profile APIs"
+        },
+        {
+            name: "Statement",
+            description: "Account Statement APIs"
         }
     ],
     paths: {
         ...authPaths,
         ...customerPaths,
+        ...accountPaths,
+        ...transactionPaths,
+        ...auditLogPaths,
+        ...employeePaths,
         ...dashboardPaths,
         ...notificationPaths,
         ...profilePaths,
-        ...supportPaths
+        ...supportPaths,
+        ...statementPaths
     },
 
     components: {
@@ -71,10 +106,15 @@ export const openApiDocument: OpenAPIV3.Document = {
             ...commonSchemas,
             ...authSchemas,
             ...customerSchemas,
+            ...accountSchemas,
+            ...transactionSchemas,
+            ...auditLogSchemas,
+            ...employeeSchemas,
             ...dashboardSchemas,
             ...notificationSchemas,
             ...profileSchemas,
-            ...supportSchemas
+            ...supportSchemas,
+            ...statementSchemas
         },
 
         securitySchemes: {

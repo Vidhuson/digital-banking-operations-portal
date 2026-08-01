@@ -3,7 +3,9 @@ import { NotificationController } from "../controllers/notification.controller";
 import { Role } from "@prisma/client";
 import { authenticate } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/role.middleware";
+import { validate } from "../middleware/validation.middleware";
 import { asyncHandler } from "../utils/async-handler";
+import { notificationReferenceParamSchema } from "../validations/notification.validation";
 
 const router = Router();
 
@@ -34,6 +36,7 @@ router.patch(
     "/:notificationReference/read",
     authenticate,
     authorize(Role.ADMIN, Role.EMPLOYEE, Role.CUSTOMER),
+    validate(notificationReferenceParamSchema),
     asyncHandler(notificationController.markAsRead)
 );
 

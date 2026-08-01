@@ -12,6 +12,21 @@ export const customerNumberSchema = z
     .min(1, "Customer number is required.")
     .regex(/^CIF\d+$/, "Invalid customer number format.");
 
+export const accountNumberSchema = z
+    .string()
+    .trim()
+    .regex(/^[0-9]{16}$/, "Invalid account number format.");
+
+export const notificationReferenceSchema = z
+    .string()
+    .trim()
+    .regex(/^NOT\d{16}$/, "Invalid notification reference format.");
+
+export const idSchema = z
+    .string()
+    .trim()
+    .uuid("Invalid UUID format.");
+
 export const phoneNumberSchema = z
     .string()
     .trim()
