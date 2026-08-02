@@ -1,42 +1,34 @@
-# Digital Banking Operations Portal
+# Retail Banking Backend
 
-An enterprise-style full-stack banking application built with Angular, Node.js, Express, Prisma, PostgreSQL, Docker, and AWS.
+Enterprise Node.js + Express backend for the Retail Banking Operations Portal.
 
-This project simulates real-world fintech and banking operations with separate Customer, Employee, and Admin portals, implementing secure authentication, RBAC, transaction management, audit logging, and scalable backend architecture.
+## Technology
 
-## Tech Stack
+- Node.js
+- Express
+- TypeScript
+- Prisma
+- PostgreSQL
+- JWT
+- Swagger
 
-* Angular
-* Node.js + Express
-* TypeScript
-* Prisma ORM
-* PostgreSQL
-* JWT Authentication
-* Docker & Docker Compose
-* GitHub Actions CI/CD
-* AWS Deployment
+## Documentation
 
-## Key Features
+- 📄 docs/Backend-Architecture.md
 
-* JWT Authentication & Authorization
-* Role-Based Access Control (RBAC)
-* Banking Accounts & Transactions
-* Audit Logs & Notifications
-* Enterprise Layered Architecture
-* REST APIs
-* Responsive Dashboard UI
-* Dockerized Development Environment
+## Features
 
-## Architecture
+- Authentication
+- Role-Based Access Control
+- Customer Management
+- Account Management
+- Transactions
+- Employee Management
+- Dashboard
+- Notifications
+- Support
+- Statements
 
-```text
-Frontend (Angular)
-        ↓
-REST APIs
-        ↓
-Backend (Express + Prisma)
-        ↓
-PostgreSQL
-```
+## Status
 
-Building for learning enterprise software engineering, scalable backend systems, frontend architecture, DevOps workflows, and fintech application design.
+🚧 Active Development
