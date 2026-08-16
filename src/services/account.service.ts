@@ -38,7 +38,7 @@ export class AccountService {
 
             const account = await this.accountRepository.createAccount({
                 accountNumber: ReferenceGenerator.generateAccountNumber(),
-                customerId: data.customerNumber,
+                customerId: customer.id,
                 branchName: "Chennai Main Branch",
                 ifscCode: "CHEN0001001",
                 accountType: data.accountType
